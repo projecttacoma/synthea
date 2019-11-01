@@ -88,19 +88,19 @@ public class Person implements Serializable, QuadTreeData {
   public final long seed;
   public long populationSeed;
   public Map<String, Object> attributes;
-  public transient Map<VitalSign, ValueGenerator> vitalSigns;
+  public Map<VitalSign, ValueGenerator> vitalSigns;
   Map<String, Map<String, Integer>> symptoms;
   Map<String, Map<String, Boolean>> symptomStatuses;
-  public transient Map<String, HealthRecord.Medication> chronicMedications;
+  public Map<String, HealthRecord.Medication> chronicMedications;
   /** the active health record. */
-  public transient HealthRecord record;
-  public transient Map<String, HealthRecord> records;
+  public HealthRecord record;
+  public Map<String, HealthRecord> records;
   public boolean hasMultipleRecords;
   /** History of the currently active module. */
   public transient List<State> history;
   /* Person's Payer History. */
   // Each element in payerHistory array corresponds to the insurance held at that age.
-  public transient Payer[] payerHistory;
+  public Payer[] payerHistory;
   // Each element in payerOwnerHistory array corresponds to the owner of the insurance at that age. 
   private String[] payerOwnerHistory;
   /* Yearly Healthcare Expenses. */

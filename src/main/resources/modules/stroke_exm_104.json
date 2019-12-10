@@ -81,7 +81,16 @@
     },
     "Hospital_stay_end": {
       "type": "EncounterEnd",
-      "direct_transition": "Terminal"
+      "distributed_transition": [
+        {
+          "transition": "Terminal",
+          "distribution": 0.1
+        },
+        {
+          "transition": "Initial",
+          "distribution": 0.9
+        }
+      ]
     },
     "Medication_discharge_antithrombotic": {
       "type": "MedicationOrder",

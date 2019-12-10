@@ -61,6 +61,7 @@ import org.hl7.fhir.dstu3.model.Device.FHIRDeviceStatus;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.DiagnosticReport.DiagnosticReportStatus;
 import org.hl7.fhir.dstu3.model.Dosage;
+import org.hl7.fhir.dstu3.model.Encounter.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterHospitalizationComponent;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
@@ -110,6 +111,7 @@ import org.hl7.fhir.dstu3.model.SupplyDelivery.SupplyDeliverySuppliedItemCompone
 import org.hl7.fhir.dstu3.model.Timing;
 import org.hl7.fhir.dstu3.model.Timing.TimingRepeatComponent;
 import org.hl7.fhir.dstu3.model.Timing.UnitsOfTime;
+import org.hl7.fhir.r4.model.codesystems.DiagnosisRole;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -247,6 +249,19 @@ public class FhirStu3 {
 
       for (HealthRecord.Entry condition : encounter.conditions) {
         condition(person, personEntry, bundle, encounterEntry, condition);
+      }
+
+      int rank = 0;
+      for (HealthRecord.Entry condition : encounter.conditions) {
+        rank++;
+        DiagnosisComponent dc = new DiagnosisComponent();
+        dc.setRank(rank);
+        CodeableConcept cc = new CodeableConcept().addCoding(new Coding().setCode(DiagnosisRole.BILLING.toCode())
+            .setSystem("http://hl7.org/fhir/ValueSet/diagnosis-role"));
+        dc.setRole(cc);
+        dc.setCondition(new Reference(condition.fullUrl));
+        org.hl7.fhir.dstu3.model.Encounter e = (org.hl7.fhir.dstu3.model.Encounter) encounterEntry.getResource();
+        e.addDiagnosis(dc);
       }
 
       for (HealthRecord.Entry allergy : encounter.allergies) {

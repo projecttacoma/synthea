@@ -1,0 +1,129 @@
+{
+  "name": "exm_104",
+  "remarks": [
+    "a non clinically-accurate stroke encounter module, for use with EXM104"
+  ],
+  "states": {
+    "Initial": {
+      "type": "Initial",
+      "direct_transition": "Stroke_Guard"
+    },
+    "Terminal": {
+      "type": "Terminal"
+    },
+    "Stroke_encounter_start": {
+      "type": "Encounter",
+      "encounter_class": "inpatient",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": 183452005,
+          "display": "Emergency hospital admission (procedure)"
+        }
+      ],
+      "direct_transition": "Hospital_stay_delay",
+      "reason": "ischemic_stroke"
+    },
+    "Hospital_stay_delay": {
+      "type": "Delay",
+      "range": {
+        "low": 1,
+        "high": 50,
+        "unit": "days"
+      },
+      "conditional_transition": [
+        {
+          "transition": "Medication_discharge_antithrombotic",
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "stroke_type",
+            "operator": "==",
+            "value": "ischemic_stroke"
+          }
+        },
+        {
+          "transition": "Hospital_stay_end"
+        }
+      ]
+    },
+    "Stroke_Guard": {
+      "type": "Guard",
+      "allow": {
+        "condition_type": "Age",
+        "operator": ">=",
+        "quantity": 18,
+        "unit": "years",
+        "value": 0
+      },
+      "direct_transition": "Stroke_Delay"
+    },
+    "Stroke_Delay": {
+      "type": "Delay",
+      "distributed_transition": [
+        {
+          "transition": "ischemic_stroke",
+          "distribution": 0.75
+        },
+        {
+          "transition": "Terminal",
+          "distribution": 0.15
+        },
+        {
+          "transition": "hemorrhagic_stroke",
+          "distribution": 0.1
+        }
+      ],
+      "range": {
+        "low": 0,
+        "high": 10,
+        "unit": "years"
+      }
+    },
+    "Hospital_stay_end": {
+      "type": "EncounterEnd",
+      "direct_transition": "Terminal"
+    },
+    "Medication_discharge_antithrombotic": {
+      "type": "MedicationOrder",
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": 1364445,
+          "display": "apixaban 5MG Oral Tablet"
+        }
+      ],
+      "direct_transition": "Hospital_stay_end",
+      "reason": "ischemic_stroke",
+      "remarks": [
+        "8654-6",
+        ""
+      ]
+    },
+    "ischemic_stroke": {
+      "type": "ConditionOnset",
+      "assign_to_attribute": "stroke_type",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": 230690007,
+          "display": "Cerebrovascular accident (disorder)"
+        }
+      ],
+      "direct_transition": "Stroke_encounter_start",
+      "target_encounter": "Stroke_encounter_start"
+    },
+    "hemorrhagic_stroke": {
+      "type": "ConditionOnset",
+      "assign_to_attribute": "stroke_type",
+      "target_encounter": "Stroke_encounter_start",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": 274100004,
+          "display": "Cerebral hemorrhage (disorder)"
+        }
+      ],
+      "direct_transition": "Stroke_encounter_start"
+    }
+  }
+}

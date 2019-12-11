@@ -31,20 +31,7 @@
         "high": 50,
         "unit": "days"
       },
-      "conditional_transition": [
-        {
-          "transition": "Medication_discharge_antithrombotic",
-          "condition": {
-            "condition_type": "Attribute",
-            "attribute": "stroke_type",
-            "operator": "==",
-            "value": "ischemic_stroke"
-          }
-        },
-        {
-          "transition": "Hospital_stay_end"
-        }
-      ]
+      "direct_transition": "Ischemic_stroke_end"
     },
     "Stroke_Guard": {
       "type": "Guard",
@@ -62,11 +49,11 @@
       "distributed_transition": [
         {
           "transition": "ischemic_stroke",
-          "distribution": 0.75
+          "distribution": 0.89
         },
         {
           "transition": "Terminal",
-          "distribution": 0.15
+          "distribution": 0.01
         },
         {
           "transition": "hemorrhagic_stroke",
@@ -75,22 +62,13 @@
       ],
       "range": {
         "low": 0,
-        "high": 10,
+        "high": 1,
         "unit": "years"
       }
     },
     "Hospital_stay_end": {
       "type": "EncounterEnd",
-      "distributed_transition": [
-        {
-          "transition": "Terminal",
-          "distribution": 0.1
-        },
-        {
-          "transition": "Initial",
-          "distribution": 0.9
-        }
-      ]
+      "direct_transition": "Medication_delay"
     },
     "Medication_discharge_antithrombotic": {
       "type": "MedicationOrder",
@@ -110,7 +88,7 @@
     },
     "ischemic_stroke": {
       "type": "ConditionOnset",
-      "assign_to_attribute": "stroke_type",
+      "assign_to_attribute": "ischemic_stroke",
       "codes": [
         {
           "system": "SNOMED-CT",
@@ -123,8 +101,7 @@
     },
     "hemorrhagic_stroke": {
       "type": "ConditionOnset",
-      "assign_to_attribute": "stroke_type",
-      "target_encounter": "Stroke_encounter_start",
+      "target_encounter": "hemorrhagic_stroke_start",
       "codes": [
         {
           "system": "SNOMED-CT",
@@ -132,7 +109,65 @@
           "display": "Cerebral hemorrhage (disorder)"
         }
       ],
-      "direct_transition": "Stroke_encounter_start"
+      "direct_transition": "hemorrhagic_stroke_start"
+    },
+    "hemorrhagic_stroke_start": {
+      "type": "Encounter",
+      "encounter_class": "inpatient",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": 183452005,
+          "display": "Emergency hospital admission (procedure)"
+        }
+      ],
+      "direct_transition": "Hospital_stay_delay",
+      "reason": "hemorrhagic_stroke"
+    },
+    "Medication_delay": {
+      "type": "Delay",
+      "direct_transition": "Antithrombotic_end",
+      "range": {
+        "low": 1,
+        "high": 10,
+        "unit": "days"
+      }
+    },
+    "Antithrombotic_end": {
+      "type": "MedicationEnd",
+      "distributed_transition": [
+        {
+          "transition": "Terminal",
+          "distribution": 0.01
+        },
+        {
+          "transition": "Stroke_Delay",
+          "distribution": 0.99
+        }
+      ],
+      "medication_order": "Medication_discharge_antithrombotic"
+    },
+    "Ischemic_stroke_end": {
+      "type": "ConditionEnd",
+      "condition_onset": "ischemic_stroke",
+      "direct_transition": "Hemorrhagic_stroke_end"
+    },
+    "Hemorrhagic_stroke_end": {
+      "type": "ConditionEnd",
+      "conditional_transition": [
+        {
+          "transition": "Medication_discharge_antithrombotic",
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "ischemic_stroke",
+            "operator": "is not nil"
+          }
+        },
+        {
+          "transition": "Hospital_stay_end"
+        }
+      ],
+      "condition_onset": "hemorrhagic_stroke"
     }
   }
 }

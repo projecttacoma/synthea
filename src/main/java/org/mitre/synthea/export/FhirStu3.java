@@ -140,7 +140,8 @@ import org.mitre.synthea.world.concepts.HealthRecord.Procedure;
 import org.mitre.synthea.world.concepts.HealthRecord.Report;
 
 public class FhirStu3 {
-  // HAPI FHIR warns that the context creation is expensive, and should be performed
+  // HAPI FHIR warns that the context creation is expensive, and should be
+  // performed
   // per-application, not per-record
   private static final FhirContext FHIR_CTX = FhirContext.forDstu3();
 
@@ -166,7 +167,7 @@ public class FhirStu3 {
 
   private static final String COUNTRY_CODE = Config.get("generate.geography.country_code");
 
-  private static final Table<String,String,String> SHR_MAPPING = loadSHRMapping();
+  private static final Table<String, String, String> SHR_MAPPING = loadSHRMapping();
 
   @SuppressWarnings("rawtypes")
   private static Map loadRaceEthnicityCodes() {
@@ -196,15 +197,14 @@ public class FhirStu3 {
     }
   }
 
-
   private static Table<String, String, String> loadSHRMapping() {
     if (!USE_SHR_EXTENSIONS) {
       // don't bother creating the table unless we need it
       return null;
     }
-    Table<String,String,String> mappingTable = HashBasedTable.create();
+    Table<String, String, String> mappingTable = HashBasedTable.create();
 
-    List<LinkedHashMap<String,String>> csvData;
+    List<LinkedHashMap<String, String>> csvData;
     try {
       csvData = SimpleCSV.parse(Utilities.readResource("shr_mapping.csv"));
     } catch (IOException e) {
@@ -212,7 +212,7 @@ public class FhirStu3 {
       return null;
     }
 
-    for (LinkedHashMap<String,String> line : csvData) {
+    for (LinkedHashMap<String, String> line : csvData) {
       String system = line.get("SYSTEM");
       String code = line.get("CODE");
       String url = line.get("URL");
@@ -231,7 +231,7 @@ public class FhirStu3 {
    * Convert the given Person into a FHIR Bundle, containing the Patient and the
    * associated entries from their health record.
    *
-   * @param person Person to generate the FHIR from
+   * @param person   Person to generate the FHIR from
    * @param stopTime Time the simulation ended
    * @return FHIR Bundle containing the Person's health record.
    */
@@ -258,7 +258,7 @@ public class FhirStu3 {
         DiagnosisComponent dc = new DiagnosisComponent();
         dc.setRank(rank);
         CodeableConcept cc = new CodeableConcept().addCoding(new Coding().setCode(DiagnosisRole.BILLING.toCode())
-            .setSystem("http://hl7.org/fhir/ValueSet/diagnosis-role"));
+            .setSystem("http://hl7.org/fhir/diagnosis-role"));
         dc.setRole(cc);
         dc.setCondition(new Reference(condition.fullUrl));
         org.hl7.fhir.dstu3.model.Encounter e = (org.hl7.fhir.dstu3.model.Encounter) encounterEntry.getResource();
@@ -315,33 +315,32 @@ public class FhirStu3 {
       BundleEntryComponent encounterClaim = encounterClaim(person, personEntry, bundle,
           encounterEntry, encounter.claim);
 
-      explanationOfBenefit(personEntry,bundle,encounterEntry,person,
-          encounterClaim, encounter);
+      explanationOfBenefit(personEntry, bundle, encounterEntry, person, encounterClaim, encounter);
     }
     return bundle;
   }
 
   /**
-   * Convert the given Person into a JSON String, containing a FHIR Bundle of the Person and the
-   * associated entries from their health record.
+   * Convert the given Person into a JSON String, containing a FHIR Bundle of the
+   * Person and the associated entries from their health record.
    *
-   * @param person Person to generate the FHIR JSON for
+   * @param person   Person to generate the FHIR JSON for
    * @param stopTime Time the simulation ended
    * @return String containing a JSON representation of a FHIR Bundle containing the Person's
    *     health record.
    */
   public static String convertToFHIRJson(Person person, long stopTime) {
     Bundle bundle = convertToFHIR(person, stopTime);
-    String bundleJson = FHIR_CTX.newJsonParser().setPrettyPrint(true)
-        .encodeResourceToString(bundle);
+    String bundleJson = FHIR_CTX.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
     return bundleJson;
   }
 
   /**
-   * Map the given Person to a FHIR Patient resource, and add it to the given Bundle.
+   * Map the given Person to a FHIR Patient resource, and add it to the given
+   * Bundle.
    *
-   * @param person The Person
-   * @param bundle The Bundle to add to
+   * @param person   The Person
+   * @param bundle   The Bundle to add to
    * @param stopTime Time the simulation ended
    * @return The created Entry
    */
@@ -353,31 +352,24 @@ public class FhirStu3 {
         .setValue((String) person.attributes.get(Person.ID));
 
     Code mrnCode = new Code("http://hl7.org/fhir/v2/0203", "MR", "Medical Record Number");
-    patientResource.addIdentifier()
-        .setType(mapCodeToCodeableConcept(mrnCode, "http://hl7.org/fhir/v2/0203"))
-        .setSystem("http://hospital.smarthealthit.org")
-        .setValue((String) person.attributes.get(Person.ID));
+    patientResource.addIdentifier().setType(mapCodeToCodeableConcept(mrnCode, "http://hl7.org/fhir/v2/0203"))
+        .setSystem("http://hospital.smarthealthit.org").setValue((String) person.attributes.get(Person.ID));
 
     Code ssnCode = new Code("http://hl7.org/fhir/identifier-type", "SB", "Social Security Number");
-    patientResource.addIdentifier()
-        .setType(mapCodeToCodeableConcept(ssnCode, "http://hl7.org/fhir/identifier-type"))
-        .setSystem("http://hl7.org/fhir/sid/us-ssn")
-        .setValue((String) person.attributes.get(Person.IDENTIFIER_SSN));
+    patientResource.addIdentifier().setType(mapCodeToCodeableConcept(ssnCode, "http://hl7.org/fhir/identifier-type"))
+        .setSystem("http://hl7.org/fhir/sid/us-ssn").setValue((String) person.attributes.get(Person.IDENTIFIER_SSN));
 
     if (person.attributes.get(Person.IDENTIFIER_DRIVERS) != null) {
       Code driversCode = new Code("http://hl7.org/fhir/v2/0203", "DL", "Driver's License");
-      patientResource.addIdentifier()
-          .setType(mapCodeToCodeableConcept(driversCode, "http://hl7.org/fhir/v2/0203"))
+      patientResource.addIdentifier().setType(mapCodeToCodeableConcept(driversCode, "http://hl7.org/fhir/v2/0203"))
           .setSystem("urn:oid:2.16.840.1.113883.4.3.25")
           .setValue((String) person.attributes.get(Person.IDENTIFIER_DRIVERS));
     }
 
     if (person.attributes.get(Person.IDENTIFIER_PASSPORT) != null) {
       Code passportCode = new Code("http://hl7.org/fhir/v2/0203", "PPN", "Passport Number");
-      patientResource.addIdentifier()
-          .setType(mapCodeToCodeableConcept(passportCode, "http://hl7.org/fhir/v2/0203"))
-          .setSystem(SHR_EXT + "passportNumber")
-          .setValue((String) person.attributes.get(Person.IDENTIFIER_PASSPORT));
+      patientResource.addIdentifier().setType(mapCodeToCodeableConcept(passportCode, "http://hl7.org/fhir/v2/0203"))
+          .setSystem(SHR_EXT + "passportNumber").setValue((String) person.attributes.get(Person.IDENTIFIER_PASSPORT));
     }
 
     if (person.attributes.get(Person.CONTACT_EMAIL) != null) {
@@ -394,8 +386,7 @@ public class FhirStu3 {
     }
 
     // We do not yet account for mixed race
-    Extension raceExtension = new Extension(
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race");
+    Extension raceExtension = new Extension("http://hl7.org/fhir/us/core/StructureDefinition/us-core-race");
     String race = (String) person.attributes.get(Person.RACE);
 
     String raceDisplay;
@@ -441,8 +432,7 @@ public class FhirStu3 {
     patientResource.addExtension(raceExtension);
 
     // We do not yet account for mixed ethnicity
-    Extension ethnicityExtension = new Extension(
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity");
+    Extension ethnicityExtension = new Extension("http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity");
     String ethnicity = (String) person.attributes.get(Person.ETHNICITY);
 
     String ethnicityDisplay;
@@ -474,12 +464,11 @@ public class FhirStu3 {
 
     String firstLanguage = (String) person.attributes.get(Person.FIRST_LANGUAGE);
     Map languageMap = (Map) languageLookup.get(firstLanguage);
-    Code languageCode = new Code((String) languageMap.get("system"),
-        (String) languageMap.get("code"), (String) languageMap.get("display"));
-    List<PatientCommunicationComponent> communication =
-        new ArrayList<PatientCommunicationComponent>();
-    communication.add(new PatientCommunicationComponent(
-        mapCodeToCodeableConcept(languageCode, (String) languageMap.get("system"))));
+    Code languageCode = new Code((String) languageMap.get("system"), (String) languageMap.get("code"),
+        (String) languageMap.get("display"));
+    List<PatientCommunicationComponent> communication = new ArrayList<PatientCommunicationComponent>();
+    communication.add(
+        new PatientCommunicationComponent(mapCodeToCodeableConcept(languageCode, (String) languageMap.get("system"))));
     patientResource.setCommunication(communication);
 
     HumanName name = patientResource.addName();
@@ -514,8 +503,7 @@ public class FhirStu3 {
     long birthdate = (long) person.attributes.get(Person.BIRTHDATE);
     patientResource.setBirthDate(new Date(birthdate));
 
-    Extension birthSexExtension = new Extension(
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex");
+    Extension birthSexExtension = new Extension("http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex");
     if (person.attributes.get(Person.GENDER).equals("M")) {
       patientResource.setGender(AdministrativeGender.MALE);
       birthSexExtension.setValue(new CodeType("M"));
@@ -529,8 +517,7 @@ public class FhirStu3 {
 
     Address addrResource = patientResource.addAddress();
     addrResource.addLine((String) person.attributes.get(Person.ADDRESS))
-        .setCity((String) person.attributes.get(Person.CITY))
-        .setPostalCode((String) person.attributes.get(Person.ZIP))
+        .setCity((String) person.attributes.get(Person.CITY)).setPostalCode((String) person.attributes.get(Person.ZIP))
         .setState(state);
     if (COUNTRY_CODE != null) {
       addrResource.setCountry(COUNTRY_CODE);
@@ -538,36 +525,31 @@ public class FhirStu3 {
 
     Address birthplace = new Address();
     birthplace.setCity((String) person.attributes.get(Person.BIRTH_CITY))
-            .setState((String) person.attributes.get(Person.BIRTH_STATE))
-            .setCountry((String) person.attributes.get(Person.BIRTH_COUNTRY));
+        .setState((String) person.attributes.get(Person.BIRTH_STATE))
+        .setCountry((String) person.attributes.get(Person.BIRTH_COUNTRY));
 
-    Extension birthplaceExtension = new Extension(
-        "http://hl7.org/fhir/StructureDefinition/birthPlace");
+    Extension birthplaceExtension = new Extension("http://hl7.org/fhir/StructureDefinition/birthPlace");
     birthplaceExtension.setValue(birthplace);
     patientResource.addExtension(birthplaceExtension);
 
     if (person.attributes.get(Person.MULTIPLE_BIRTH_STATUS) != null) {
-      patientResource.setMultipleBirth(
-          new IntegerType((int) person.attributes.get(Person.MULTIPLE_BIRTH_STATUS)));
+      patientResource.setMultipleBirth(new IntegerType((int) person.attributes.get(Person.MULTIPLE_BIRTH_STATUS)));
     } else {
       patientResource.setMultipleBirth(new BooleanType(false));
     }
 
     patientResource.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE)
-        .setUse(ContactPoint.ContactPointUse.HOME)
-        .setValue((String) person.attributes.get(Person.TELECOM));
+        .setUse(ContactPoint.ContactPointUse.HOME).setValue((String) person.attributes.get(Person.TELECOM));
 
     String maritalStatus = ((String) person.attributes.get(Person.MARITAL_STATUS));
     if (maritalStatus != null) {
-      Code maritalStatusCode = new Code("http://hl7.org/fhir/v3/MaritalStatus", maritalStatus,
-          maritalStatus);
-      patientResource.setMaritalStatus(
-          mapCodeToCodeableConcept(maritalStatusCode, "http://hl7.org/fhir/v3/MaritalStatus"));
+      Code maritalStatusCode = new Code("http://hl7.org/fhir/v3/MaritalStatus", maritalStatus, maritalStatus);
+      patientResource
+          .setMaritalStatus(mapCodeToCodeableConcept(maritalStatusCode, "http://hl7.org/fhir/v3/MaritalStatus"));
     } else {
-      Code maritalStatusCode = new Code("http://hl7.org/fhir/v3/MaritalStatus", "S",
-          "Never Married");
-      patientResource.setMaritalStatus(
-          mapCodeToCodeableConcept(maritalStatusCode, "http://hl7.org/fhir/v3/MaritalStatus"));
+      Code maritalStatusCode = new Code("http://hl7.org/fhir/v3/MaritalStatus", "S", "Never Married");
+      patientResource
+          .setMaritalStatus(mapCodeToCodeableConcept(maritalStatusCode, "http://hl7.org/fhir/v3/MaritalStatus"));
     }
 
     Point2D.Double coord = person.getLonLat();
@@ -579,13 +561,11 @@ public class FhirStu3 {
     }
 
     if (!person.alive(stopTime)) {
-      patientResource.setDeceased(
-          convertFhirDateTime((Long) person.attributes.get(Person.DEATHDATE), true));
+      patientResource.setDeceased(convertFhirDateTime((Long) person.attributes.get(Person.DEATHDATE), true));
     }
 
     String generatedBySynthea = "Generated by <a href=\"https://github.com/synthetichealth/synthea\">Synthea</a>."
-        + "Version identifier: " + Utilities.SYNTHEA_VERSION + " . "
-        + "  Person seed: " + person.seed
+        + "Version identifier: " + Utilities.SYNTHEA_VERSION + " . " + "  Person seed: " + person.seed
         + "  Population seed: " + person.populationSeed;
 
     patientResource.setText(new Narrative().setStatus(NarrativeStatus.GENERATED)
@@ -598,36 +578,32 @@ public class FhirStu3 {
       // Patient profile requires race, ethnicity, birthsex,
       // MothersMaidenName, FathersName, Person-extension
 
-      patientResource.addExtension()
-        .setUrl(SHR_EXT + "shr-actor-FictionalPerson-extension")
-        .setValue(new BooleanType(true));
+      patientResource.addExtension().setUrl(SHR_EXT + "shr-actor-FictionalPerson-extension")
+          .setValue(new BooleanType(true));
 
       String fathersName = (String) person.attributes.get(Person.NAME_FATHER);
-      Extension fathersNameExtension = new Extension(
-          SHR_EXT + "shr-entity-FathersName-extension", new HumanName().setText(fathersName));
+      Extension fathersNameExtension = new Extension(SHR_EXT + "shr-entity-FathersName-extension",
+          new HumanName().setText(fathersName));
       patientResource.addExtension(fathersNameExtension);
 
       String ssn = (String) person.attributes.get(Person.IDENTIFIER_SSN);
-      Extension ssnExtension = new Extension(
-          SHR_EXT + "shr-demographics-SocialSecurityNumber-extension",
+      Extension ssnExtension = new Extension(SHR_EXT + "shr-demographics-SocialSecurityNumber-extension",
           new StringType(ssn));
       patientResource.addExtension(ssnExtension);
 
       Basic personResource = new Basic();
       // the only required field on this patient resource is code
 
-      Coding fixedCode = new Coding(
-          "http://standardhealthrecord.org/fhir/basic-resource-type",
-          "shr-entity-Person", "shr-entity-Person");
+      Coding fixedCode = new Coding("http://standardhealthrecord.org/fhir/basic-resource-type", "shr-entity-Person",
+          "shr-entity-Person");
       personResource.setCode(new CodeableConcept().addCoding(fixedCode));
 
       Meta personMeta = new Meta();
       personMeta.addProfile(SHR_EXT + "shr-entity-Person");
       personResource.setMeta(personMeta);
 
-      BundleEntryComponent personEntry = newEntry(person, bundle, personResource);
-      patientResource.addExtension()
-          .setUrl(SHR_EXT + "shr-entity-Person-extension")
+      BundleEntryComponent personEntry = newEntry(bundle, personResource);
+      patientResource.addExtension().setUrl(SHR_EXT + "shr-entity-Person-extension")
           .setValue(new Reference(personEntry.getFullUrl()));
     }
 

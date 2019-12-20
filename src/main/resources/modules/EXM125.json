@@ -1,0 +1,84 @@
+{
+    "name": "EXM125",
+    "remarks": [
+      "EXM125  Based on CMS125v7 - Breast Cancer Screening"
+    ],
+    "states": {
+      "Initial": {
+        "type": "Initial",
+        "direct_transition": "IPP_Age_Guard"
+      },
+      "IPP_Age_Guard": {
+        "type": "Guard",
+        "remarks": [
+          "====================================================================================================================",
+          "and Global.CalendarAgeInYearsAt(FHIRHelpers.ToDate(Patient.birthDate), start of Measurement Period) in Interval[51, 74]",
+          "===================================================================================================================="
+        ],
+        "allow": {
+          "condition_type": "Age",
+          "operator": ">=",
+          "quantity": 52,
+          "unit": "years"
+        },
+        "conditional_transition": [
+            {
+              "condition": {
+                "condition_type": "Date",
+                "operator": ">=",
+                "year": 2019
+              },
+              "transition": "IPP_Qualifying_Encounter"
+            }
+        ]
+      },
+      "IPP_Qualifying_Encounter": {
+        "remarks": [
+          "==============================================================================",
+          "and exists AdultOutpatientEncounters.Qualifying Encounters(Measurement Period)",
+          "=============================================================================="
+        ],
+        "type": "Encounter",
+        "encounter_class": "ambulatory",
+        "codes": [
+          {
+              "system": "http://snomed.info/sct",
+              "code": "185465003",
+              "display": "Weekend visit (procedure)"
+          }
+        ],
+        "distributed_transition": [
+          {
+            "distribution": 0.5,
+            "transition": "NUMER_DiagnosticReport_Mammography"
+          },
+          {
+            "distribution": 0.5,
+            "transition": "Terminal"
+          }
+        ]      
+      },
+      "NUMER_DiagnosticReport_Mammography": {
+        "type": "DiagnosticReport",
+        "remarks": [
+          "=============================================================================================",
+          "[DiagnosticReport: Mammography] Mammogram",
+          "where ( Mammogram.effective ends 27 months or less before day of end of Measurement Period )",
+          "and Mammogram.status in { 'final', 'amended', 'corrected', 'appended' }",
+          "============================================================================================="
+        ],
+        "codes": [
+          {
+            "system": "LOINC",
+            "code": "24605-8",
+            "display": "MG Breast Diagnostic"
+          }
+        ],
+        "observations": [],
+        "direct_transition": "Terminal"
+      },
+      "Terminal": {
+        "type": "Terminal"
+      }
+    }
+}

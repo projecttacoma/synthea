@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import org.apache.sis.geometry.DirectPosition2D;
@@ -1540,6 +1541,19 @@ public class FhirStu3 {
     return conditionEntry;
   }
 
+  private static Type randomizeAsPeriodOrDateTime(long startTime) {
+    Random rand = new Random();
+    int choiceSelector = rand.nextInt(2) + 1;
+    if (choiceSelector % 2 == 0) {
+      int durationMultiplier = rand.nextInt(10);
+      // duration (15 minute intervals) in ms
+      long duration = (15 * 60 * 1000) * durationMultiplier;
+      return new Period().setStart(new Date(startTime)).setEnd(new Date(startTime + duration));
+    } else {
+      return convertFhirDateTime(startTime, true);
+    }
+  }
+
   /**
    * Map the Condition into a FHIR AllergyIntolerance resource, and add it to the given Bundle.
    *
@@ -1623,7 +1637,7 @@ public class FhirStu3 {
       }
     }
 
-    observationResource.setEffective(convertFhirDateTime(observation.start, true));
+    observationResource.setEffective(randomizeAsPeriodOrDateTime(observation.start));
     observationResource.setIssued(new Date(observation.start));
 
     if (USE_SHR_EXTENSIONS) {
@@ -1922,7 +1936,7 @@ public class FhirStu3 {
     String system = code.system.equals("SNOMED-CT") ? SNOMED_URI : RXNORM_URI;
 
     medicationResource.setMedication(mapCodeToCodeableConcept(code, system));
-    medicationResource.setEffective(new DateTimeType(new Date(medication.start)));
+    medicationResource.setEffective(randomizeAsPeriodOrDateTime(medication.start));
 
     medicationResource.setStatus(MedicationAdministrationStatus.fromCode("completed"));
 
@@ -1989,7 +2003,7 @@ public class FhirStu3 {
     reportResource.setCode(mapCodeToCodeableConcept(report.codes.get(0), LOINC_URI));
     reportResource.setSubject(new Reference(personEntry.getFullUrl()));
     reportResource.setContext(new Reference(encounterEntry.getFullUrl()));
-    reportResource.setEffective(convertFhirDateTime(report.start, true));
+    reportResource.setEffective(randomizeAsPeriodOrDateTime(report.start));
     reportResource.setIssued(new Date(report.start));
     for (Observation observation : report.observations) {
       Reference reference = new Reference(observation.fullUrl);

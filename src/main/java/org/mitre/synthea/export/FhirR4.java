@@ -121,6 +121,7 @@ import org.hl7.fhir.r4.model.Timing;
 import org.hl7.fhir.r4.model.Timing.TimingRepeatComponent;
 import org.hl7.fhir.r4.model.Timing.UnitsOfTime;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.codesystems.DiagnosisRole;
 import org.hl7.fhir.r4.model.codesystems.DoseRateType;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -253,6 +254,19 @@ public class FhirR4 {
 
       for (HealthRecord.Entry condition : encounter.conditions) {
         condition(personEntry, bundle, encounterEntry, condition);
+      }
+
+      int rank = 0;
+      for (HealthRecord.Entry condition : encounter.conditions) {
+        rank++;
+        org.hl7.fhir.r4.model.Encounter.DiagnosisComponent dc = new org.hl7.fhir.r4.model.Encounter.DiagnosisComponent();
+        dc.setRank(rank);
+        CodeableConcept cc = new CodeableConcept().addCoding(
+            new Coding().setCode(DiagnosisRole.BILLING.toCode()).setSystem("http://hl7.org/fhir/diagnosis-role"));
+        dc.setUse(cc);
+        dc.setCondition(new Reference(condition.fullUrl));
+        org.hl7.fhir.r4.model.Encounter e = (org.hl7.fhir.r4.model.Encounter) encounterEntry.getResource();
+        e.addDiagnosis(dc);
       }
 
       for (HealthRecord.Entry allergy : encounter.allergies) {

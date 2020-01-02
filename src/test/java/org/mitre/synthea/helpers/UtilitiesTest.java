@@ -26,7 +26,6 @@ public class UtilitiesTest {
     assertTrue(date > year);
   }
 
-  @Ignore("Test fails when run after mid-December")
   @Test
   public void testYears() {
     int gap = 75;

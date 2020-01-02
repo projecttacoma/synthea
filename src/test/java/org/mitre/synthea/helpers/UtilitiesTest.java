@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import com.google.gson.JsonPrimitive;
 import java.util.Date;
 import org.junit.Test;
-import org.junit.Ignore;
 
 public class UtilitiesTest {
 
@@ -24,7 +23,6 @@ public class UtilitiesTest {
     assertTrue(date > year);
   }
 
-  @Ignore("Test fails when run after mid-December")
   @Test
   public void testYears() {
     int gap = 75;

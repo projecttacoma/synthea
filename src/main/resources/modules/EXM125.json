@@ -74,7 +74,20 @@
             "display": "MG Breast Diagnostic"
           }
         ],
-        "observations": [],
+        "observations": [
+          {
+            "category": "laboratory",
+            "vital_sign": "Glucose",
+            "codes": [
+              {
+                "system": "LOINC",
+                "code": "2339-0",
+                "display": "Glucose"
+              }
+            ],
+            "unit": "mg/dL"
+          }
+        ],
         "direct_transition": "Terminal"
       },
       "Terminal": {

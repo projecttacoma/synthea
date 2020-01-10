@@ -1,0 +1,207 @@
+{
+  "name": "exm_105",
+  "remarks": [
+    "a non clinically-accurate stroke encounter module, for use with EXM105"
+  ],
+  "states": {
+    "Initial": {
+      "type": "Initial",
+      "direct_transition": "Stroke_Guard",
+      "name": "Initial"
+    },
+    "Terminal": {
+      "type": "Terminal",
+      "name": "Terminal"
+    },
+    "Stroke_encounter_start": {
+      "type": "Encounter",
+      "encounter_class": "inpatient",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": 183452005,
+          "display": "Emergency hospital admission (procedure)"
+        }
+      ],
+      "direct_transition": "Hospital_stay_delay",
+      "reason": "ischemic_stroke",
+      "name": "Stroke_encounter_start"
+    },
+    "Hospital_stay_delay": {
+      "type": "Delay",
+      "range": {
+        "low": 1,
+        "high": 50,
+        "unit": "days"
+      },
+      "direct_transition": "Ischemic_stroke_end",
+      "name": "Hospital_stay_delay"
+    },
+    "Stroke_Guard": {
+      "type": "Guard",
+      "allow": {
+        "condition_type": "Age",
+        "operator": ">=",
+        "quantity": 18,
+        "unit": "years",
+        "value": 0
+      },
+      "direct_transition": "Stroke_Delay",
+      "name": "Stroke_Guard"
+    },
+    "Stroke_Delay": {
+      "type": "Delay",
+      "distributed_transition": [
+        {
+          "transition": "ischemic_stroke",
+          "distribution": 0.9
+        },
+        {
+          "transition": "hemorrhagic_stroke",
+          "distribution": 0.1
+        }
+      ],
+      "range": {
+        "low": 0,
+        "high": 1,
+        "unit": "years"
+      },
+      "name": "Stroke_Delay"
+    },
+    "Hospital_stay_end": {
+      "type": "EncounterEnd",
+      "direct_transition": "Medication_delay",
+      "name": "Hospital_stay_end"
+    },
+    "ischemic_stroke": {
+      "type": "ConditionOnset",
+      "assign_to_attribute": "ischemic_stroke",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": 230690007,
+          "display": "Cerebrovascular accident (disorder)"
+        }
+      ],
+      "direct_transition": "Stroke_encounter_start",
+      "target_encounter": "Stroke_encounter_start",
+      "name": "ischemic_stroke"
+    },
+    "hemorrhagic_stroke": {
+      "type": "ConditionOnset",
+      "target_encounter": "hemorrhagic_stroke_start",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": 274100004,
+          "display": "Cerebral hemorrhage (disorder)"
+        }
+      ],
+      "direct_transition": "hemorrhagic_stroke_start",
+      "name": "hemorrhagic_stroke"
+    },
+    "hemorrhagic_stroke_start": {
+      "type": "Encounter",
+      "encounter_class": "inpatient",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": 183452005,
+          "display": "Emergency hospital admission (procedure)"
+        }
+      ],
+      "direct_transition": "Hospital_stay_delay",
+      "reason": "hemorrhagic_stroke",
+      "name": "hemorrhagic_stroke_start"
+    },
+    "Medication_delay": {
+      "type": "Delay",
+      "direct_transition": "Statin_end",
+      "range": {
+        "low": 1,
+        "high": 10,
+        "unit": "days"
+      },
+      "name": "Medication_delay"
+    },
+    "Statin_end": {
+      "type": "MedicationEnd",
+      "distributed_transition": [
+        {
+          "transition": "Terminal",
+          "distribution": 0.01
+        },
+        {
+          "transition": "Stroke_Delay",
+          "distribution": 0.99
+        }
+      ],
+      "medication_order": "Medication_discharge_statin",
+      "name": "Statin_end"
+    },
+    "Ischemic_stroke_end": {
+      "type": "ConditionEnd",
+      "condition_onset": "ischemic_stroke",
+      "direct_transition": "Hemorrhagic_stroke_end",
+      "name": "Ischemic_stroke_end"
+    },
+    "Hemorrhagic_stroke_end": {
+      "type": "ConditionEnd",
+      "condition_onset": "hemorrhagic_stroke",
+      "complex_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "ischemic_stroke",
+            "operator": "is not nil"
+          },
+          "distributions": [
+            {
+              "transition": "Medication_discharge_statin",
+              "distribution": 0.50
+            },
+            {
+              "transition": "Hospital_stay_end",
+              "distribution": 0.50
+            }
+          ]
+        },
+        {
+          "distributions": [
+            {
+              "transition": "Hospital_stay_end",
+              "distribution": 1
+            }
+          ]
+        }
+      ],
+      "name": "Hemorrhagic_stroke_end"
+    },
+    "Med_delay": {
+      "type": "Delay",
+      "direct_transition": "Hospital_stay_end",
+      "range": {
+        "low": 1,
+        "high": 2,
+        "unit": "hours"
+      },
+      "name": "Med_delay"
+    },
+    "Medication_discharge_statin": {
+      "type": "MedicationOrder",
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": 197903,
+          "display": "Lovastatin 10 MG Oral Table"
+        }
+      ],
+      "direct_transition": "Med_delay",
+      "reason": "ischemic_stroke",
+      "remarks": [
+        "[\"MedicationRequest\"] Statin where (Statin.medication as CodeableConcept) in \"Statin Grouper\""
+      ],
+      "name": "Medication_discharge_statin"
+    }
+  }
+}

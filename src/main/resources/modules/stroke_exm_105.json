@@ -63,7 +63,7 @@
       ],
       "range": {
         "low": 0,
-        "high": 1,
+        "high": 3,
         "unit": "years"
       },
       "name": "Stroke_Delay"
@@ -158,11 +158,11 @@
           "distributions": [
             {
               "transition": "Medication_discharge_statin",
-              "distribution": 0.50
+              "distribution": 0.75
             },
             {
               "transition": "Hospital_stay_end",
-              "distribution": 0.50
+              "distribution": 0.25
             }
           ]
         },

@@ -1,0 +1,84 @@
+{
+    "name": "EXM130",
+    "remarks": [
+      "EXM130  Based on CMS130v7 - Colorectal Cancer Screening",
+      "As of version 7.2.000, logic for DENOM is simply 'true' therefore all patients meeting IPOP will meet DENOM"
+    ],
+    "states": {
+      "Initial": {
+        "type": "Initial",
+        "direct_transition": "IPP_Age_Guard"
+      },
+      "IPP_Age_Guard": {
+        "type": "Guard",
+        "remarks": [
+          "====================================================================================================================",
+          "Global.CalendarAgeInYearsAt(FHIRHelpers.ToDate(Patient.birthDate), start of Measurement Period) in Interval[50, 75]",
+          "===================================================================================================================="
+        ],
+        "allow": {
+          "condition_type": "Age",
+          "operator": ">=",
+          "quantity": 51,
+          "unit": "years"
+        },
+        "conditional_transition": [
+            {
+              "condition": {
+                "condition_type": "Date",
+                "operator": "==",
+                "year": 2019
+              },
+              "transition": "IPP_Qualifying_Encounter"
+            }
+        ]
+      },
+      "IPP_Qualifying_Encounter": {
+        "remarks": [
+          "==============================================================================",
+          "and exists AdultOutpatientEncounters.Qualifying Encounters(Measurement Period)",
+          "=============================================================================="
+        ],
+        "type": "Encounter",
+        "encounter_class": "ambulatory",
+        "codes": [
+          {
+              "system": "http://snomed.info/sct",
+              "code": "185465003",
+              "display": "Weekend visit (procedure)"
+          }
+        ],
+        "distributed_transition": [
+          {
+            "distribution": 0.5,
+            "transition": "NUMER_Colonoscopy_Performed"
+          },
+          {
+            "distribution": 0.5,
+            "transition": "Terminal"
+          }
+        ]      
+      },
+      "NUMER_Colonoscopy_Performed": {
+        "type": "Procedure",
+        "remarks": [
+          "===========================================================================================================================",
+          "define Colonoscopy Performed:",
+	        "[Procedure: Colonoscopy] Colonoscopy",
+          "where Colonoscopy.status = 'completed' and Colonoscopy.performed ends 10 years or less on or before end of Measurement Period",
+          "============================================================================================================================="
+        ],
+        "codes": [
+          {
+            "system": "SNOMED-CT",
+            "code": "73761001",
+            "display": "Colonoscopy"
+          }
+        ],
+        "direct_transition": "Terminal"
+      },
+      "Terminal": {
+        "type": "Terminal"
+      }
+    }
+}

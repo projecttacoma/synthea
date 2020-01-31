@@ -1764,6 +1764,10 @@ public class FhirR4 {
     medicationResource.setSubject(new Reference(personEntry.getFullUrl()));
     medicationResource.setEncounter(new Reference(encounterEntry.getFullUrl()));
 
+    ArrayList<CodeableConcept> cc = new ArrayList<CodeableConcept>();
+    cc.add(new CodeableConcept().addCoding(new Coding("http://terminology.hl7.org/CodeSystem/medicationrequest-category", "discharge", "")));
+    medicationResource.setCategory(cc);
+
     Code code = medication.codes.get(0);
     String system = code.system.equals("SNOMED-CT")
         ? SNOMED_URI
@@ -1777,7 +1781,7 @@ public class FhirR4 {
     medicationResource.setRequester(encounter.getParticipantFirstRep().getIndividual());
 
     if (medication.stop != 0L) {
-      medicationResource.setStatus(MedicationRequestStatus.STOPPED);
+      medicationResource.setStatus(MedicationRequestStatus.COMPLETED);
     } else {
       medicationResource.setStatus(MedicationRequestStatus.ACTIVE);
     }

@@ -65,8 +65,9 @@
           "===========================================================================================================================",
           "define Colonoscopy Performed:",
 	        "[Procedure: Colonoscopy] Colonoscopy",
-          "where Colonoscopy.status = 'completed' and Colonoscopy.performed ends 10 years or less on or before end of Measurement Period",
-          "============================================================================================================================="
+          "where Colonoscopy.status = 'completed'",
+          "  and Global.'Normalize Onset'(Colonoscopy.performed) ends 10 years or less on or before end of 'Measurement Period'",
+          "============================================================================================================================"
         ],
         "codes": [
           {

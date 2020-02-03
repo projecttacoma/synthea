@@ -1,5 +1,5 @@
 {
-    "name": "EXM130",
+    "name": "EXM130-R4",
     "remarks": [
       "EXM130  Based on CMS130v7 - Colorectal Cancer Screening",
       "As of version 7.2.000, logic for DENOM is simply 'true' therefore all patients meeting IPOP will meet DENOM"

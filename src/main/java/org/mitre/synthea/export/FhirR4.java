@@ -121,6 +121,7 @@ import org.hl7.fhir.r4.model.Timing;
 import org.hl7.fhir.r4.model.Timing.TimingRepeatComponent;
 import org.hl7.fhir.r4.model.Timing.UnitsOfTime;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.codesystems.DiagnosisRole;
 import org.hl7.fhir.r4.model.codesystems.DoseRateType;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -253,6 +254,19 @@ public class FhirR4 {
 
       for (HealthRecord.Entry condition : encounter.conditions) {
         condition(personEntry, bundle, encounterEntry, condition);
+      }
+
+      int rank = 0;
+      for (HealthRecord.Entry condition : encounter.conditions) {
+        rank++;
+        org.hl7.fhir.r4.model.Encounter.DiagnosisComponent dc = new org.hl7.fhir.r4.model.Encounter.DiagnosisComponent();
+        dc.setRank(rank);
+        CodeableConcept cc = new CodeableConcept().addCoding(
+            new Coding().setCode(DiagnosisRole.BILLING.toCode()).setSystem("http://hl7.org/fhir/diagnosis-role"));
+        dc.setUse(cc);
+        dc.setCondition(new Reference(condition.fullUrl));
+        org.hl7.fhir.r4.model.Encounter e = (org.hl7.fhir.r4.model.Encounter) encounterEntry.getResource();
+        e.addDiagnosis(dc);
       }
 
       for (HealthRecord.Entry allergy : encounter.allergies) {
@@ -1750,6 +1764,10 @@ public class FhirR4 {
     medicationResource.setSubject(new Reference(personEntry.getFullUrl()));
     medicationResource.setEncounter(new Reference(encounterEntry.getFullUrl()));
 
+    ArrayList<CodeableConcept> cc = new ArrayList<CodeableConcept>();
+    cc.add(new CodeableConcept().addCoding(new Coding("http://terminology.hl7.org/CodeSystem/medicationrequest-category", "discharge", "")));
+    medicationResource.setCategory(cc);
+
     Code code = medication.codes.get(0);
     String system = code.system.equals("SNOMED-CT")
         ? SNOMED_URI
@@ -1763,7 +1781,7 @@ public class FhirR4 {
     medicationResource.setRequester(encounter.getParticipantFirstRep().getIndividual());
 
     if (medication.stop != 0L) {
-      medicationResource.setStatus(MedicationRequestStatus.STOPPED);
+      medicationResource.setStatus(MedicationRequestStatus.COMPLETED);
     } else {
       medicationResource.setStatus(MedicationRequestStatus.ACTIVE);
     }

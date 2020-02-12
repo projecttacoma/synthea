@@ -596,6 +596,10 @@ public class FhirStu3 {
 
     org.hl7.fhir.dstu3.model.Encounter encounterResource = new org.hl7.fhir.dstu3.model.Encounter();
 
+    String resourceID = UUID.randomUUID().toString();
+    encounterResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
+
     encounterResource.setSubject(new Reference(personEntry.getFullUrl()));
     encounterResource.setStatus(EncounterStatus.FINISHED);
     if (encounter.codes.isEmpty()) {

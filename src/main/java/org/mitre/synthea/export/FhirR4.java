@@ -2858,10 +2858,6 @@ public class FhirR4 {
    * @return "[resourceType]/" or "urn:uuid:"
    */
   private static String getUrlPrefix(String resourceType) {
-    if (Boolean.parseBoolean(Config.get("exporter.fhir.bulk_data"))) {
-      return resourceType + "/";
-    } else {
-      return "urn:uuid:";
-    }
+    return resourceType + "/";
   }
 }

@@ -659,6 +659,11 @@ public class FhirR4 {
   private static BundleEntryComponent encounter(Person person, BundleEntryComponent personEntry,
                                                 Bundle bundle, Encounter encounter) {
     org.hl7.fhir.r4.model.Encounter encounterResource = new org.hl7.fhir.r4.model.Encounter();
+
+    String resourceID = UUID.randomUUID().toString();
+    encounterResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
+
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
       meta.addProfile(

@@ -2920,9 +2920,6 @@ public class FhirR4 {
   protected static BundleEntryComponent practitioner(RandomNumberGenerator rand, Bundle bundle,
           Clinician clinician) {
     Practitioner practitionerResource = new Practitioner();
-    String resourceID = UUID.randomUUID().toString();
-    practitionerResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
-        .setValue(resourceID);
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
       meta.addProfile(

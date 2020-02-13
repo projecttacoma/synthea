@@ -2553,9 +2553,6 @@ public class FhirR4 {
    */
   protected static BundleEntryComponent provider(Bundle bundle, Provider provider) {
     Organization organizationResource = new Organization();
-    String resourceID = UUID.randomUUID().toString();
-    organizationResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
-        .setValue(resourceID);
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
       meta.addProfile(

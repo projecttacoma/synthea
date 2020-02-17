@@ -659,6 +659,11 @@ public class FhirR4 {
   private static BundleEntryComponent encounter(Person person, BundleEntryComponent personEntry,
                                                 Bundle bundle, Encounter encounter) {
     org.hl7.fhir.r4.model.Encounter encounterResource = new org.hl7.fhir.r4.model.Encounter();
+
+    String resourceID = UUID.randomUUID().toString();
+    encounterResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
+
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
       meta.addProfile(
@@ -837,8 +842,12 @@ public class FhirR4 {
       Person person, BundleEntryComponent personEntry,
       Bundle bundle, BundleEntryComponent encounterEntry, Claim claim,
       BundleEntryComponent medicationEntry) {
-    
+
     org.hl7.fhir.r4.model.Claim claimResource = new org.hl7.fhir.r4.model.Claim();
+    String resourceID = UUID.randomUUID().toString();
+    claimResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
+
     org.hl7.fhir.r4.model.Encounter encounterResource =
         (org.hl7.fhir.r4.model.Encounter) encounterEntry.getResource();
 
@@ -901,6 +910,9 @@ public class FhirR4 {
       Person person, BundleEntryComponent personEntry,
       Bundle bundle, BundleEntryComponent encounterEntry, Claim claim) {
     org.hl7.fhir.r4.model.Claim claimResource = new org.hl7.fhir.r4.model.Claim();
+    String resourceID = UUID.randomUUID().toString();
+    claimResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
     org.hl7.fhir.r4.model.Encounter encounterResource =
         (org.hl7.fhir.r4.model.Encounter) encounterEntry.getResource();
     claimResource.setStatus(ClaimStatus.ACTIVE);
@@ -1029,6 +1041,9 @@ public class FhirR4 {
                                            Person person, BundleEntryComponent claimEntry,
                                            Encounter encounter) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    String resourceID = UUID.randomUUID().toString();
+    eob.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
     eob.setStatus(org.hl7.fhir.r4.model.ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
     eob.setType(new CodeableConcept()
         .addCoding(new Coding()
@@ -1340,6 +1355,10 @@ public class FhirR4 {
   private static BundleEntryComponent condition(BundleEntryComponent personEntry, Bundle bundle,
       BundleEntryComponent encounterEntry, HealthRecord.Entry condition) {
     Condition conditionResource = new Condition();
+    String resourceID = UUID.randomUUID().toString();
+    conditionResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
+
 
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
@@ -1402,6 +1421,9 @@ public class FhirR4 {
       BundleEntryComponent encounterEntry, HealthRecord.Entry allergy) {
 
     AllergyIntolerance allergyResource = new AllergyIntolerance();
+    String resourceID = UUID.randomUUID().toString();
+    allergyResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
     allergyResource.setRecordedDate(new Date(allergy.start));
 
     CodeableConcept status = new CodeableConcept();
@@ -1455,6 +1477,9 @@ public class FhirR4 {
       BundleEntryComponent encounterEntry, Observation observation) {
     org.hl7.fhir.r4.model.Observation observationResource =
         new org.hl7.fhir.r4.model.Observation();
+      String resourceID = UUID.randomUUID().toString();
+      observationResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+          .setValue(resourceID);
 
     observationResource.setSubject(new Reference(personEntry.getFullUrl()));
     observationResource.setEncounter(new Reference(encounterEntry.getFullUrl()));
@@ -1553,6 +1578,9 @@ public class FhirR4 {
   private static BundleEntryComponent procedure(BundleEntryComponent personEntry, Bundle bundle,
       BundleEntryComponent encounterEntry, Procedure procedure) {
     org.hl7.fhir.r4.model.Procedure procedureResource = new org.hl7.fhir.r4.model.Procedure();
+      String resourceID = UUID.randomUUID().toString();
+      procedureResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+          .setValue(resourceID);
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
       meta.addProfile(
@@ -1626,6 +1654,9 @@ public class FhirR4 {
   private static BundleEntryComponent device(BundleEntryComponent personEntry, Bundle bundle,
       HealthRecord.Device device) {
     Device deviceResource = new Device();
+      String resourceID = UUID.randomUUID().toString();
+      deviceResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+          .setValue(resourceID);
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
       meta.addProfile("http://hl7.org/fhir/us/core/StructureDefinition/us-core-device");
@@ -1692,7 +1723,13 @@ public class FhirR4 {
   private static BundleEntryComponent immunization(BundleEntryComponent personEntry, Bundle bundle,
       BundleEntryComponent encounterEntry, HealthRecord.Entry immunization) {
     Immunization immResource = new Immunization();
+
+    String resourceID = UUID.randomUUID().toString();
+    immResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
+
     if (USE_US_CORE_IG) {
+
       Meta meta = new Meta();
       meta.addProfile(
           "http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization");
@@ -1738,6 +1775,11 @@ public class FhirR4 {
       Person person, BundleEntryComponent personEntry, Bundle bundle,
       BundleEntryComponent encounterEntry, Medication medication) {
     MedicationRequest medicationResource = new MedicationRequest();
+      String resourceID = UUID.randomUUID().toString();
+      medicationResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+          .setValue(resourceID);
+
+
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
       meta.addProfile(
@@ -1883,6 +1925,9 @@ public class FhirR4 {
       Medication medication, MedicationRequest medicationRequest) {
 
     MedicationAdministration medicationResource = new MedicationAdministration();
+    String resourceID = UUID.randomUUID().toString();
+    medicationResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
 
     medicationResource.setSubject(new Reference(personEntry.getFullUrl()));
     medicationResource.setContext(new Reference(encounterEntry.getFullUrl()));
@@ -1959,6 +2004,9 @@ public class FhirR4 {
 
     org.hl7.fhir.r4.model.Medication medicationResource =
         new org.hl7.fhir.r4.model.Medication();
+    String resourceID = UUID.randomUUID().toString();
+    medicationResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
       meta.addProfile(
@@ -2071,6 +2119,9 @@ public class FhirR4 {
   private static BundleEntryComponent report(BundleEntryComponent personEntry, Bundle bundle,
       BundleEntryComponent encounterEntry, Report report) {
     DiagnosticReport reportResource = new DiagnosticReport();
+    String resourceID = UUID.randomUUID().toString();
+    reportResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
       meta.addProfile(
@@ -2113,6 +2164,9 @@ public class FhirR4 {
 
     // Add a DiagnosticReport
     DiagnosticReport reportResource = new DiagnosticReport();
+    String resourceID = UUID.randomUUID().toString();
+    reportResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
       meta.addProfile(
@@ -2179,6 +2233,9 @@ public class FhirR4 {
       BundleEntryComponent encounterEntry, Provider provider,
       BundleEntryComponent careTeamEntry, CarePlan carePlan) {
     org.hl7.fhir.r4.model.CarePlan careplanResource = new org.hl7.fhir.r4.model.CarePlan();
+    String resourceID = UUID.randomUUID().toString();
+    careplanResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
 
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
@@ -2279,9 +2336,11 @@ public class FhirR4 {
       Bundle bundle,
       BundleEntryComponent personEntry,
       CodeableConcept goalStatus, JsonObject goal) {
-    String resourceID = UUID.randomUUID().toString();
 
     Goal goalResource = new Goal();
+    String resourceID = UUID.randomUUID().toString();
+    goalResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
       meta.addProfile(
@@ -2370,6 +2429,9 @@ public class FhirR4 {
       BundleEntryComponent encounterEntry, CarePlan carePlan) {
 
     CareTeam careTeam = new CareTeam();
+    String resourceID = UUID.randomUUID().toString();
+    careTeam.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
 
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
@@ -2457,6 +2519,9 @@ public class FhirR4 {
       BundleEntryComponent encounterEntry, ImagingStudy imagingStudy) {
     org.hl7.fhir.r4.model.ImagingStudy imagingStudyResource =
         new org.hl7.fhir.r4.model.ImagingStudy();
+      String resourceID = UUID.randomUUID().toString();
+      imagingStudyResource.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+          .setValue(resourceID);
 
     imagingStudyResource.addIdentifier(generateIdentifier(imagingStudy.dicomUid));
     imagingStudyResource.setStatus(ImagingStudyStatus.AVAILABLE);
@@ -2604,6 +2669,9 @@ public class FhirR4 {
    */
   protected static BundleEntryComponent providerLocation(Bundle bundle, Provider provider) {
     org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
+    String resourceID = UUID.randomUUID().toString();
+    location.addIdentifier().setSystem("https://github.com/synthetichealth/synthea")
+        .setValue(resourceID);
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
       meta.addProfile(
@@ -2825,9 +2893,9 @@ public class FhirR4 {
   }
 
   /**
-   * Helper function to create an Entry for the given Resource within the given Bundle. Sets the
-   * resourceID to a random UUID, sets the entry's fullURL to that resourceID, and adds the entry to
-   * the bundle.
+   * Helper function to create an Entry for the given Resource within the given
+   * Bundle. Sets the resourceID and identifier to a random UUID, sets the
+   * entry's fullURL to that resourceID, and adds the entry to the bundle.
    *
    * @param bundle   The Bundle to add the Entry to
    * @param resource Resource the new Entry should contain
@@ -2858,10 +2926,6 @@ public class FhirR4 {
    * @return "[resourceType]/" or "urn:uuid:"
    */
   private static String getUrlPrefix(String resourceType) {
-    if (Boolean.parseBoolean(Config.get("exporter.fhir.bulk_data"))) {
-      return resourceType + "/";
-    } else {
-      return "urn:uuid:";
-    }
+    return resourceType + "/";
   }
 }

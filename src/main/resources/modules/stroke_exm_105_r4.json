@@ -6,12 +6,10 @@
   "states": {
     "Initial": {
       "type": "Initial",
-      "direct_transition": "Stroke_Guard",
-      "name": "Initial"
+      "direct_transition": "Stroke_Guard"
     },
     "Terminal": {
-      "type": "Terminal",
-      "name": "Terminal"
+      "type": "Terminal"
     },
     "Stroke_encounter_start": {
       "type": "Encounter",
@@ -24,8 +22,7 @@
         }
       ],
       "direct_transition": "Hospital_stay_delay",
-      "reason": "ischemic_stroke",
-      "name": "Stroke_encounter_start"
+      "reason": "ischemic_stroke"
     },
     "Hospital_stay_delay": {
       "type": "Delay",
@@ -34,8 +31,7 @@
         "high": 50,
         "unit": "days"
       },
-      "direct_transition": "Ischemic_stroke_end",
-      "name": "Hospital_stay_delay"
+      "direct_transition": "Ischemic_stroke_end"
     },
     "Stroke_Guard": {
       "type": "Guard",
@@ -46,8 +42,7 @@
         "unit": "years",
         "value": 0
       },
-      "direct_transition": "Stroke_Delay",
-      "name": "Stroke_Guard"
+      "direct_transition": "Stroke_Delay"
     },
     "Stroke_Delay": {
       "type": "Delay",
@@ -65,13 +60,27 @@
         "low": 0,
         "high": 3,
         "unit": "years"
-      },
-      "name": "Stroke_Delay"
+      }
     },
     "Hospital_stay_end": {
       "type": "EncounterEnd",
-      "direct_transition": "Medication_delay",
-      "name": "Hospital_stay_end"
+      "direct_transition": "Medication_delay"
+    },
+    "Medication_discharge_statin": {
+      "type": "MedicationOrder",
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": 197903,
+          "display": "Lovastatin 10 MG Oral Tablet"
+        }
+      ],
+      "direct_transition": "Med_delay",
+      "reason": "ischemic_stroke",
+      "remarks": [
+        "8654-6",
+        ""
+      ]
     },
     "ischemic_stroke": {
       "type": "ConditionOnset",
@@ -84,8 +93,7 @@
         }
       ],
       "direct_transition": "Stroke_encounter_start",
-      "target_encounter": "Stroke_encounter_start",
-      "name": "ischemic_stroke"
+      "target_encounter": "Stroke_encounter_start"
     },
     "hemorrhagic_stroke": {
       "type": "ConditionOnset",
@@ -97,8 +105,7 @@
           "display": "Cerebral hemorrhage (disorder)"
         }
       ],
-      "direct_transition": "hemorrhagic_stroke_start",
-      "name": "hemorrhagic_stroke"
+      "direct_transition": "hemorrhagic_stroke_start"
     },
     "hemorrhagic_stroke_start": {
       "type": "Encounter",
@@ -111,8 +118,7 @@
         }
       ],
       "direct_transition": "Hospital_stay_delay",
-      "reason": "hemorrhagic_stroke",
-      "name": "hemorrhagic_stroke_start"
+      "reason": "hemorrhagic_stroke"
     },
     "Medication_delay": {
       "type": "Delay",
@@ -121,8 +127,7 @@
         "low": 1,
         "high": 10,
         "unit": "days"
-      },
-      "name": "Medication_delay"
+      }
     },
     "Statin_end": {
       "type": "MedicationEnd",
@@ -136,14 +141,12 @@
           "distribution": 0.99
         }
       ],
-      "medication_order": "Medication_discharge_statin",
-      "name": "Statin_end"
+      "medication_order": "Medication_discharge_statin"
     },
     "Ischemic_stroke_end": {
       "type": "ConditionEnd",
       "condition_onset": "ischemic_stroke",
-      "direct_transition": "Hemorrhagic_stroke_end",
-      "name": "Ischemic_stroke_end"
+      "direct_transition": "Hemorrhagic_stroke_end"
     },
     "Hemorrhagic_stroke_end": {
       "type": "ConditionEnd",
@@ -174,8 +177,7 @@
             }
           ]
         }
-      ],
-      "name": "Hemorrhagic_stroke_end"
+      ]
     },
     "Med_delay": {
       "type": "Delay",
@@ -184,28 +186,7 @@
         "low": 1,
         "high": 2,
         "unit": "hours"
-      },
-      "name": "Med_delay"
-    },
-    "Medication_discharge_statin": {
-      "type": "MedicationOrder",
-      "codes": [
-        {
-          "system": "RxNorm",
-          "code": 197903,
-          "display": "Lovastatin 10 MG Oral Tablet"
-        }
-      ],
-      "direct_transition": "Med_delay",
-      "reason": "ischemic_stroke",
-      "remarks": [
-        "[\"MedicationRequest\": medication in \"Statin Grouper\"] Statin",
-          "//Note: expressed as an or with equivalence semantics pending resolution of potential CQL issue.",
-          "where exists (Statin.category C where FHIRHelpers.ToConcept(C) ~ Global.\"Community\" or FHIRHelpers.ToConcept(C) ~ Global.\"Discharge\")",
-            "and Statin.status in { 'active', 'completed' }",
-            "and Statin.intent = 'order'"
-      ],
-      "name": "Medication_discharge_statin"
+      }
     }
   }
 }

@@ -2874,7 +2874,7 @@ public class FhirR4 {
    * @param resourceType The resource type being referenced.
    * @return "[resourceType]/" or "urn:uuid:"
    */
-  private static String getUrlPrefix(String resourceType) {
+  public static String getUrlPrefix(String resourceType) {
     return resourceType + "/";
   }
 }

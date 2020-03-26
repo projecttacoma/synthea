@@ -5,6 +5,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.json.simple.JSONObject;
@@ -22,6 +24,8 @@ public class ValueSetResolver {
   private IParser fhirParser;
   private String filePath;
 
+  final Pattern OID_REGEX = Pattern.compile("([0-9]+\\.)+[0-9]+");
+
   public ValueSetResolver(String filePath) {
     FhirContext ctx = FhirContext.forR4();
     this.jsonParser = new JSONParser();
@@ -34,6 +38,18 @@ public class ValueSetResolver {
     String bundleString = jsonBundle.toString();
     Bundle bundle = fhirParser.parseResource(Bundle.class, bundleString);
     return bundle;
+  }
+
+  private String matchOID(String input) {
+    if (input == null) return null;
+
+    Matcher m = OID_REGEX.matcher(input);
+
+    if (m.find()) {
+      return m.group(0);
+    }
+
+    return null;
   }
 
   /**
@@ -50,9 +66,16 @@ public class ValueSetResolver {
       // Check each identifier and add to list if matches
       for (BundleEntryComponent e : vsetBundle.getEntry()) {
         ValueSet vset = (ValueSet) e.getResource();
-        String oid = vset.getIdentifierFirstRep().getValue();
-        if (oid != null && desiredOIDs.contains(oid)) {
-          matchingValueSets.add(vset);
+        String knownOID = this.matchOID(vset.getIdentifierFirstRep().getValue());
+
+        if (knownOID == null) continue;
+
+        for (String oid : desiredOIDs) {
+          String desiredOID = this.matchOID(oid);
+          if (desiredOID != null && desiredOID.equals(knownOID)) {
+            matchingValueSets.add(vset);
+            break;
+          }
         }
       }
 

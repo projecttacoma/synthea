@@ -57,32 +57,35 @@ public class ValueSetResolver {
    * 
    * @param desiredOIDs List of OIDs to match against
    * @return List of ValueSet resources that match the desired OIDs
+   * @throws ParseException when unable to parse ValueSet bundle into JSON
+   * @throws IOException when unable to read in file
+   * @throws FileNotFoundException when provided an invalid path to ValueSet Bundle
+   * @throws RuntimeException when ValueSet is not found
    */
-  public List<ValueSet> getValueSets(List<String> desiredOIDs) {
-    try {
-      Bundle vsetBundle = this.parseValueSetBundle();
-      List<ValueSet> matchingValueSets = new ArrayList<ValueSet>();
-      
-      // Check each identifier and add to list if matches
+  public List<ValueSet> getValueSets(List<String> desiredOIDs) throws FileNotFoundException, IOException, ParseException {
+    Bundle vsetBundle = this.parseValueSetBundle();
+    List<ValueSet> matchingValueSets = new ArrayList<ValueSet>();
+
+    // Check each identifier and add to list if matches
+    for (String oid : desiredOIDs) {
+      String desiredOID = this.matchOID(oid);
+
+      boolean foundMatchingOID = false;
       for (BundleEntryComponent e : vsetBundle.getEntry()) {
         ValueSet vset = (ValueSet) e.getResource();
         String knownOID = this.matchOID(vset.getIdentifierFirstRep().getValue());
 
-        if (knownOID == null) continue;
-
-        for (String oid : desiredOIDs) {
-          String desiredOID = this.matchOID(oid);
-          if (desiredOID != null && desiredOID.equals(knownOID)) {
-            matchingValueSets.add(vset);
-            break;
-          }
+        if (knownOID != null && knownOID.equals(desiredOID)) {
+          matchingValueSets.add(vset);
+          foundMatchingOID = true;
+          break;
         }
       }
 
-      return matchingValueSets;
-    } catch (IOException | ParseException e) {
-      e.printStackTrace();
-      return null;
+      if (!foundMatchingOID) {
+        throw new RuntimeException(String.format("Could not resolve ValueSet %s", oid));
+      }
     }
+    return matchingValueSets;
   }
 }

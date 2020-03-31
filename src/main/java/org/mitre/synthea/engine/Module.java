@@ -350,7 +350,7 @@ public class Module {
 
   /**
    * Get a collection of the names of all the states this Module contains.
-   * 
+   *
    * @return set of all state names, or empty set if this is a non-GMF module
    */
   public Collection<String> getStateNames() {
@@ -361,11 +361,16 @@ public class Module {
     return states.keySet();
   }
 
+  /**
+   * Gets all the non-null valueset URLs from the states in this Module.
+   *
+   * @return Set with all the unique valueset URLs
+   */
   public Set<String> getValueSetUrls() {
     if (states != null) {
       return states.values().stream()
         .filter(s -> s.valueset != null)
-        .map(s-> s.valueset.url)
+        .map(s -> s.valueset.url)
         .collect(Collectors.toSet());
     }
     return new HashSet<String>();

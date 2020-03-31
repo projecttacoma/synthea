@@ -126,8 +126,8 @@ public class HealthRecord implements Serializable {
     /**
      * Create a new ValueSet.
      *
-     * @param url    the valueset URL
-     * @param display human-readable description of the coe
+     * @param url     the valueset URL
+     * @param display human-readable description of the code
      */
     public ValueSet(String url, String display) {
       this.url = url;

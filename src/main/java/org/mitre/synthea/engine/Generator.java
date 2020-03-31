@@ -295,6 +295,7 @@ public class Generator implements RandomNumberGenerator {
 
   /**
    * Extracts a list of names from the supplied list of modules.
+   *
    * @param modules A collection of modules
    * @return A list of module names.
    */
@@ -305,7 +306,9 @@ public class Generator implements RandomNumberGenerator {
   }
 
   /**
-   * Extracts a Set of ValueSet URLs from a List of Modules (which gets them from its embedded States)
+   * Extracts a Set of ValueSet URLs from a List of Modules
+   * (which gets them from its embedded States).
+   *
    * @param modules a collection of Modules
    * @return a Set of ValueSet URLs
    */

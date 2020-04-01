@@ -41,6 +41,7 @@ import org.mitre.synthea.world.concepts.HealthRecord.EncounterType;
 import org.mitre.synthea.world.concepts.HealthRecord.Entry;
 import org.mitre.synthea.world.concepts.HealthRecord.Medication;
 import org.mitre.synthea.world.concepts.HealthRecord.Report;
+import org.mitre.synthea.world.concepts.HealthRecord.ValueSet;
 import org.simulator.math.odes.MultiTable;
 
 public abstract class State implements Cloneable {
@@ -58,6 +59,8 @@ public abstract class State implements Cloneable {
   private List<ComplexTransitionOption> complexTransition;
   private List<LookupTableTransitionOption> lookupTableTransition;
   public List<String> remarks;
+
+  public ValueSet valueset; // This is included at the top level for ease of computation
 
   protected void initialize(Module module, String name, JsonObject definition) {
     this.module = module;
@@ -117,6 +120,7 @@ public abstract class State implements Cloneable {
       clone.name = this.name;
       clone.transition = this.transition;
       clone.remarks = this.remarks;
+      clone.valueset = this.valueset;
       return clone;
     } catch (CloneNotSupportedException e) {
       // should not happen, and not something we can handle

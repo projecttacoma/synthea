@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -254,6 +255,7 @@ public class Generator {
 
   /**
    * Extracts a list of names from the supplied list of modules.
+   *
    * @param modules A collection of modules
    * @return A list of module names.
    */
@@ -261,6 +263,19 @@ public class Generator {
     return modules.stream()
             .map(m -> m.name)
             .collect(Collectors.toList());
+  }
+
+  /**
+   * Extracts a Set of ValueSet URLs from a List of Modules
+   * (which gets them from its embedded States).
+   *
+   * @param modules a collection of Modules
+   * @return a Set of ValueSet URLs
+   */
+  private Set<String> getValueSetUrls(List<Module> modules) {
+    return modules.stream()
+      .flatMap(m -> m.getValueSetUrls().stream())
+      .collect(Collectors.toSet());
   }
   
   /**

@@ -21,17 +21,20 @@ import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.mitre.synthea.helpers.Config;
 import org.mitre.synthea.helpers.Utilities;
@@ -347,7 +350,7 @@ public class Module {
 
   /**
    * Get a collection of the names of all the states this Module contains.
-   * 
+   *
    * @return set of all state names, or empty set if this is a non-GMF module
    */
   public Collection<String> getStateNames() {
@@ -356,6 +359,21 @@ public class Module {
       return Collections.emptySet();
     }
     return states.keySet();
+  }
+
+  /**
+   * Gets all the non-null valueset URLs from the states in this Module.
+   *
+   * @return Set with all the unique valueset URLs
+   */
+  public Set<String> getValueSetUrls() {
+    if (states != null) {
+      return states.values().stream()
+        .filter(s -> s.valueset != null)
+        .map(s -> s.valueset.url)
+        .collect(Collectors.toSet());
+    }
+    return new HashSet<String>();
   }
 
   /**

@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.mitre.synthea.helpers.Utilities;
 import org.mitre.synthea.world.agents.Clinician;
@@ -93,6 +92,57 @@ public class HealthRecord {
       if (compare == 0) {
         compare = this.code.compareTo(other.code);
       }
+      return compare;
+    }
+  }
+
+  /**
+   * HealthRecord.ValueSet represents a valueset URL and display name.
+   */
+  public static class ValueSet implements Comparable<ValueSet> {
+    /** The ValueSet URL. */
+    public String url;
+    /** The human-readable description of the ValueSet. */
+    public String display;
+
+    /**
+     * Create a new ValueSet.
+     *
+     * @param url     the valueset URL
+     * @param display human-readable description of the code
+     */
+    public ValueSet(String url, String display) {
+      this.url = url;
+      this.display = display;
+    }
+
+    /**
+     * Create a new ValueSet from JSON.
+     *
+     * @param definition JSON object that contains 'url', and 'display'
+     *                   attributes.
+     */
+    public ValueSet(JsonObject definition) {
+      this.url = definition.get("url").getAsString();
+      this.display = definition.get("display").getAsString();
+    }
+
+    public boolean equals(ValueSet other) {
+      return this.url.equals(other.url);
+    }
+
+    public String toString() {
+      return String.format("%s %s", url, display);
+    }
+
+    public static ValueSet fromJson(JsonObject jsonValueSet) {
+      ValueSet vs = new ValueSet(jsonValueSet);
+      return vs;
+    }
+
+    @Override
+    public int compareTo(ValueSet other) {
+      int compare = this.url.compareTo(other.url);
       return compare;
     }
   }

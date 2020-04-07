@@ -57,7 +57,10 @@
             "distribution": 0.5,
             "transition": "Terminal"
           }
-        ]      
+        ],
+        "additional_attributes": {
+          "foo": "bar"
+        }
       },
       "NUMER_Colonoscopy_Performed": {
         "type": "Procedure",

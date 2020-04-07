@@ -249,6 +249,10 @@ public class FhirR4 {
     BundleEntryComponent personEntry = basicInfo(person, bundle, stopTime);
 
     for (Encounter encounter : person.record.encounters) {
+      if (encounter.name != null && encounter.name.equals("IPP_Qualifying_Encounter")) {
+        System.out.println(encounter.additionalAttributes);
+      }
+
       BundleEntryComponent encounterEntry = encounter(person, personEntry, bundle, encounter);
 
       for (HealthRecord.Entry condition : encounter.conditions) {

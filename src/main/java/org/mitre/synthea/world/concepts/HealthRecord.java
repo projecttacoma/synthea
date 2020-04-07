@@ -161,6 +161,7 @@ public class HealthRecord {
     public long stop;
     public String type;
     public List<Code> codes;
+    public JsonObject additionalAttributes;
     private BigDecimal cost;
 
     /**

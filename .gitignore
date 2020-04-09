@@ -27,4 +27,5 @@ src/main/resources/version.txt
 /build/
 
 src/main/resources/map.json
-
+# eCQM ValueSets
+src/main/resources/terminology/*

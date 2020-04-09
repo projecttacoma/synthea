@@ -1434,7 +1434,8 @@ public class FhirR4 {
     conditionResource.setEncounter(new Reference(encounterEntry.getFullUrl()));
 
     Code code = condition.codes.get(0);
-    conditionResource.setCode(mapCodeToCodeableConcept(code, SNOMED_URI));
+    String system = ExportHelper.getSystemURI(code.system);
+    conditionResource.setCode(mapCodeToCodeableConcept(code, system));
 
     CodeableConcept verification = new CodeableConcept();
     verification.getCodingFirstRep()
@@ -1507,7 +1508,8 @@ public class FhirR4 {
 
     allergyResource.setPatient(new Reference(personEntry.getFullUrl()));
     Code code = allergy.codes.get(0);
-    allergyResource.setCode(mapCodeToCodeableConcept(code, SNOMED_URI));
+    String system = ExportHelper.getSystemURI(code.system);
+    allergyResource.setCode(mapCodeToCodeableConcept(code, system));
 
     if (USE_US_CORE_IG) {
       Meta meta = new Meta();
@@ -1546,15 +1548,17 @@ public class FhirR4 {
     observationResource.setStatus(ObservationStatus.FINAL);
 
     Code code = observation.codes.get(0);
-    observationResource.setCode(mapCodeToCodeableConcept(code, LOINC_URI));
+    String system = ExportHelper.getSystemURI(code.system);
+    observationResource.setCode(mapCodeToCodeableConcept(code, system));
     // add extra codes, if there are any...
     if (observation.codes.size() > 1) {
       for (int i = 1; i < observation.codes.size(); i++) {
         code = observation.codes.get(i);
+        system = ExportHelper.getSystemURI(code.system);
         Coding coding = new Coding();
         coding.setCode(code.code);
         coding.setDisplay(code.display);
-        coding.setSystem(LOINC_URI);
+        coding.setSystem(system);
         observationResource.getCode().addCoding(coding);
       }
     }
@@ -1570,7 +1574,9 @@ public class FhirR4 {
       // multi-observation (ex blood pressure)
       for (Observation subObs : observation.observations) {
         ObservationComponentComponent comp = new ObservationComponentComponent();
-        comp.setCode(mapCodeToCodeableConcept(subObs.codes.get(0), LOINC_URI));
+        Code subCode = subObs.codes.get(0);
+        system = ExportHelper.getSystemURI(subCode.system);
+        comp.setCode(mapCodeToCodeableConcept(subCode, system));
         Type value = mapValueToFHIRType(subObs.value, subObs.unit);
         comp.setValue(value);
         observationResource.addComponent(comp);
@@ -1619,9 +1625,12 @@ public class FhirR4 {
       return null;
     } else if (value instanceof Condition) {
       Code conditionCode = ((HealthRecord.Entry) value).codes.get(0);
-      return mapCodeToCodeableConcept(conditionCode, SNOMED_URI);
+      String system = ExportHelper.getSystemURI(conditionCode.system);
+      return mapCodeToCodeableConcept(conditionCode, system);
     } else if (value instanceof Code) {
-      return mapCodeToCodeableConcept((Code) value, SNOMED_URI);
+      Code codeValue = (Code) value;
+      String system = ExportHelper.getSystemURI(codeValue.system);
+      return mapCodeToCodeableConcept(codeValue, system);
     } else if (value instanceof String) {
       return new StringType((String) value);
     } else if (value instanceof Number) {
@@ -1709,7 +1718,8 @@ public class FhirR4 {
     }
 
     Code code = procedure.codes.get(0);
-    CodeableConcept procCode = mapCodeToCodeableConcept(code, SNOMED_URI);
+    String system = ExportHelper.getSystemURI(code.system);
+    CodeableConcept procCode = mapCodeToCodeableConcept(code, system);
     procedureResource.setCode(procCode);
 
     if (procedure.stop != 0L) {
@@ -1793,7 +1803,10 @@ public class FhirR4 {
     deviceResource.addDeviceName()
         .setName(device.codes.get(0).display)
         .setType(DeviceNameType.USERFRIENDLYNAME);
-    deviceResource.setType(mapCodeToCodeableConcept(device.codes.get(0), SNOMED_URI));
+
+    Code deviceCode = device.codes.get(0);
+    String system = ExportHelper.getSystemURI(deviceCode.system);
+    deviceResource.setType(mapCodeToCodeableConcept(deviceCode, system));
     deviceResource.setPatient(new Reference(personEntry.getFullUrl()));
     return newEntry(rand, bundle, deviceResource);
   }
@@ -1997,9 +2010,7 @@ public class FhirR4 {
     medicationResource.setCategory(cc);
 
     Code code = medication.codes.get(0);
-    String system = code.system.equals("SNOMED-CT")
-        ? SNOMED_URI
-        : RXNORM_URI;
+    String system = ExportHelper.getSystemURI(code.system);
     medicationResource.setMedication(mapCodeToCodeableConcept(code, system));
 
     if (USE_US_CORE_IG && medication.administration) {
@@ -2145,7 +2156,7 @@ public class FhirR4 {
     medicationResource.setContext(new Reference(encounterEntry.getFullUrl()));
 
     Code code = medication.codes.get(0);
-    String system = code.system.equals("SNOMED-CT") ? SNOMED_URI : RXNORM_URI;
+    String system = ExportHelper.getSystemURI(code.system);
 
     medicationResource.setMedication(mapCodeToCodeableConcept(code, system));
     medicationResource.setEffective(new DateTimeType(new Date(medication.start)));
@@ -2232,7 +2243,9 @@ public class FhirR4 {
     reportResource.setStatus(DiagnosticReportStatus.FINAL);
     reportResource.addCategory(new CodeableConcept(
         new Coding("http://terminology.hl7.org/CodeSystem/v2-0074", "LAB", "Laboratory")));
-    reportResource.setCode(mapCodeToCodeableConcept(report.codes.get(0), LOINC_URI));
+    Code reportCode = report.codes.get(0);
+    String system = ExportHelper.getSystemURI(reportCode.system);
+    reportResource.setCode(mapCodeToCodeableConcept(reportCode, system));
     reportResource.setSubject(new Reference(personEntry.getFullUrl()));
     reportResource.setEncounter(new Reference(encounterEntry.getFullUrl()));
     reportResource.setEffective(convertFhirDateTime(report.start, true));
@@ -2368,7 +2381,8 @@ public class FhirR4 {
     careplanResource.addCareTeam(new Reference(careTeamEntry.getFullUrl()));
 
     Code code = carePlan.codes.get(0);
-    careplanResource.addCategory(mapCodeToCodeableConcept(code, SNOMED_URI));
+    String system = ExportHelper.getSystemURI(code.system);
+    careplanResource.addCategory(mapCodeToCodeableConcept(code, system));
     narrative += code.display + ".";
 
     CarePlanActivityStatus activityStatus;

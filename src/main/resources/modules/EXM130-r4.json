@@ -41,13 +41,10 @@
         ],
         "type": "Encounter",
         "encounter_class": "ambulatory",
-        "codes": [
-          {
-              "system": "http://snomed.info/sct",
-              "code": "185465003",
-              "display": "Weekend visit (procedure)"
-          }
-        ],
+        "valueset": {
+          "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001",
+          "display": "Office Visit"
+        },
         "distributed_transition": [
           {
             "distribution": 0.5,
@@ -69,13 +66,10 @@
           "  and Global.'Normalize Onset'(Colonoscopy.performed) ends 10 years or less on or before end of 'Measurement Period'",
           "============================================================================================================================"
         ],
-        "codes": [
-          {
-            "system": "SNOMED-CT",
-            "code": "73761001",
-            "display": "Colonoscopy"
-          }
-        ],
+        "valueset": {
+          "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1020",
+          "display": "Colonoscopy"
+        },
         "direct_transition": "Terminal"
       },
       "Terminal": {

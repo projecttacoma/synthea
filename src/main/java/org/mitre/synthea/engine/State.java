@@ -35,7 +35,6 @@ import org.mitre.synthea.world.agents.Person;
 import org.mitre.synthea.world.agents.Provider;
 import org.mitre.synthea.world.concepts.ClinicianSpecialty;
 import org.mitre.synthea.world.concepts.HealthRecord;
-import org.mitre.synthea.world.concepts.Terminology;
 import org.mitre.synthea.world.concepts.HealthRecord.CarePlan;
 import org.mitre.synthea.world.concepts.HealthRecord.Code;
 import org.mitre.synthea.world.concepts.HealthRecord.EncounterType;
@@ -43,6 +42,7 @@ import org.mitre.synthea.world.concepts.HealthRecord.Entry;
 import org.mitre.synthea.world.concepts.HealthRecord.Medication;
 import org.mitre.synthea.world.concepts.HealthRecord.Report;
 import org.mitre.synthea.world.concepts.HealthRecord.ValueSet;
+import org.mitre.synthea.world.concepts.Terminology;
 import org.simulator.math.odes.MultiTable;
 
 public abstract class State implements Cloneable {

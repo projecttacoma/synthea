@@ -1047,6 +1047,7 @@ public abstract class State implements Cloneable, Serializable {
       String primaryCode = codes.get(0).code;
       entry = person.record.conditionStart(time, primaryCode);
       entry.name = this.name;
+      entry.additionalAttributes = this.additionalAttributes;
       if (codes != null) {
         entry.codes.addAll(codes);
       }
@@ -1119,6 +1120,7 @@ public abstract class State implements Cloneable, Serializable {
       entry = person.record.allergyStart(time, primaryCode);
       entry.name = this.name;
       entry.codes.addAll(codes);
+      entry.additionalAttributes = this.additionalAttributes;
 
       if (assignToAttribute != null) {
         person.attributes.put(assignToAttribute, entry);

@@ -61,6 +61,7 @@ public abstract class State implements Cloneable {
   public List<String> remarks;
 
   public ValueSet valueset; // This is included at the top level for ease of computation
+  public JsonObject additionalAttributes;
 
   protected void initialize(Module module, String name, JsonObject definition) {
     this.module = module;
@@ -121,6 +122,7 @@ public abstract class State implements Cloneable {
       clone.transition = this.transition;
       clone.remarks = this.remarks;
       clone.valueset = this.valueset;
+      clone.additionalAttributes = this.additionalAttributes;
       return clone;
     } catch (CloneNotSupportedException e) {
       // should not happen, and not something we can handle
@@ -659,6 +661,7 @@ public abstract class State implements Cloneable {
         }
         person.setCurrentEncounter(module, encounter);
         encounter.name = this.name;
+        encounter.additionalAttributes = additionalAttributes;
 
         diagnosePastConditions(person, time);
 
@@ -855,6 +858,7 @@ public abstract class State implements Cloneable {
       String primaryCode = codes.get(0).code;
       entry = person.record.conditionStart(time, primaryCode);
       entry.name = this.name;
+      entry.additionalAttributes = this.additionalAttributes;
       if (codes != null) {
         entry.codes.addAll(codes);
       }
@@ -920,6 +924,7 @@ public abstract class State implements Cloneable {
       entry = person.record.allergyStart(time, primaryCode);
       entry.name = this.name;
       entry.codes.addAll(codes);
+      entry.additionalAttributes = this.additionalAttributes;
 
       if (assignToAttribute != null) {
         person.attributes.put(assignToAttribute, entry);
@@ -1006,6 +1011,7 @@ public abstract class State implements Cloneable {
       entry = medication;
       medication.name = this.name;
       medication.codes.addAll(codes);
+      medication.additionalAttributes = this.additionalAttributes;
 
       if (reason != null) {
         // "reason" is an attribute or stateName referencing a previous conditionOnset state
@@ -1118,6 +1124,7 @@ public abstract class State implements Cloneable {
       entry = careplan;
       careplan.name = this.name;
       careplan.codes.addAll(codes);
+      careplan.additionalAttributes = this.additionalAttributes;
 
       if (activities != null) {
         careplan.activities.addAll(activities);
@@ -1216,6 +1223,7 @@ public abstract class State implements Cloneable {
       entry = procedure;
       procedure.name = this.name;
       procedure.codes.addAll(codes);
+      procedure.additionalAttributes = this.additionalAttributes;
 
       if (reason != null) {
         // "reason" is an attribute or stateName referencing a previous conditionOnset state
@@ -1418,6 +1426,7 @@ public abstract class State implements Cloneable {
       observation.codes.addAll(codes);
       observation.category = category;
       observation.unit = unit;
+      observation.additionalAttributes = this.additionalAttributes;
 
       return true;
     }
@@ -1470,6 +1479,7 @@ public abstract class State implements Cloneable {
       observation.name = this.name;
       observation.codes.addAll(codes);
       observation.category = category;
+      observation.additionalAttributes = this.additionalAttributes;
 
       return true;
     }
@@ -1493,6 +1503,7 @@ public abstract class State implements Cloneable {
       entry = report;
       report.name = this.name;
       report.codes.addAll(codes);
+      report.additionalAttributes = this.additionalAttributes;
 
       // increment number of labs by respective provider
       Provider provider;
@@ -1553,6 +1564,7 @@ public abstract class State implements Cloneable {
       procedure.name = this.name;
       procedure.codes.add(procedureCode);
       procedure.stop = procedure.start + TimeUnit.MINUTES.toMillis(30);
+      procedure.additionalAttributes = this.additionalAttributes;
       return true;
     }
 

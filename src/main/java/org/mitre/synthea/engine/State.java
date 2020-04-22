@@ -42,6 +42,7 @@ import org.mitre.synthea.world.concepts.HealthRecord.Entry;
 import org.mitre.synthea.world.concepts.HealthRecord.Medication;
 import org.mitre.synthea.world.concepts.HealthRecord.Report;
 import org.mitre.synthea.world.concepts.HealthRecord.ValueSet;
+import org.mitre.synthea.world.concepts.Terminology;
 import org.simulator.math.odes.MultiTable;
 
 public abstract class State implements Cloneable {
@@ -656,7 +657,9 @@ public abstract class State implements Cloneable {
         HealthRecord.Encounter encounter = EncounterModule.createEncounter(person, time, type,
             ClinicianSpecialty.GENERAL_PRACTICE, null);
         entry = encounter;
-        if (codes != null) {
+        if (this.valueset != null) {
+          encounter.codes.add(Terminology.getRandomCode(this.valueset.url));
+        } else if (codes != null) {
           encounter.codes.addAll(codes);
         }
         person.setCurrentEncounter(module, encounter);
@@ -830,11 +833,18 @@ public abstract class State implements Cloneable {
       if (targetEncounter == null || targetEncounter.trim().length() == 0
           || (encounter != null && targetEncounter.equals(encounter.name))) {
         diagnose(person, time);
-      } else if (assignToAttribute != null && codes != null) {
+      } else if (assignToAttribute != null && (codes != null || this.valueset != null)) {
         // create a temporary coded entry to use for reference in the attribute,
         // which will be replaced if the thing is diagnosed
-        HealthRecord.Entry codedEntry = person.record.new Entry(time, codes.get(0).code);
-        codedEntry.codes.addAll(codes);
+        HealthRecord.Entry codedEntry;
+        if (this.valueset != null) {
+          Code code = Terminology.getRandomCode(this.valueset.url);
+          codedEntry = person.record.new Entry(time, code.code);
+          codedEntry.codes.add(code);
+        } else {
+          codedEntry = person.record.new Entry(time, codes.get(0).code);
+          codedEntry.codes.addAll(codes);
+        }
 
         person.attributes.put(assignToAttribute, codedEntry);
       }
@@ -855,13 +865,16 @@ public abstract class State implements Cloneable {
   public static class ConditionOnset extends OnsetState {
     @Override
     public void diagnose(Person person, long time) {
-      String primaryCode = codes.get(0).code;
-      entry = person.record.conditionStart(time, primaryCode);
-      entry.name = this.name;
-      entry.additionalAttributes = this.additionalAttributes;
-      if (codes != null) {
+      if (this.valueset != null) {
+        Code primaryCode = Terminology.getRandomCode(this.valueset.url);
+        entry = person.record.conditionStart(time, primaryCode.code);
+        entry.codes.add(primaryCode);
+      } else if (codes != null) {
+        entry = person.record.conditionStart(time, codes.get(0).code);
         entry.codes.addAll(codes);
       }
+      entry.name = this.name;
+      entry.additionalAttributes = this.additionalAttributes;
       if (assignToAttribute != null) {
         person.attributes.put(assignToAttribute, entry);
       }
@@ -920,10 +933,15 @@ public abstract class State implements Cloneable {
   public static class AllergyOnset extends OnsetState {
     @Override
     public void diagnose(Person person, long time) {
-      String primaryCode = codes.get(0).code;
-      entry = person.record.allergyStart(time, primaryCode);
+      if (this.valueset != null) {
+        Code primaryCode = Terminology.getRandomCode(this.valueset.url);
+        entry = person.record.allergyStart(time, primaryCode.code);
+        entry.codes.add(primaryCode);
+      } else {
+        entry = person.record.allergyStart(time, codes.get(0).code);
+        entry.codes.addAll(codes);
+      }
       entry.name = this.name;
-      entry.codes.addAll(codes);
       entry.additionalAttributes = this.additionalAttributes;
 
       if (assignToAttribute != null) {
@@ -1006,13 +1024,18 @@ public abstract class State implements Cloneable {
 
     @Override
     public boolean process(Person person, long time) {
-      String primaryCode = codes.get(0).code;
-      Medication medication = person.record.medicationStart(time, primaryCode, chronic);
+      Medication medication;
+      if (this.valueset != null) {
+        Code primaryCode = codes.get(0);
+        medication = person.record.medicationStart(time, primaryCode.code, chronic);
+        medication.codes.add(primaryCode);
+      } else {
+        medication = person.record.medicationStart(time, codes.get(0).code, chronic);
+        medication.codes.addAll(codes);
+      }
       entry = medication;
       medication.name = this.name;
-      medication.codes.addAll(codes);
       medication.additionalAttributes = this.additionalAttributes;
-
       if (reason != null) {
         // "reason" is an attribute or stateName referencing a previous conditionOnset state
         if (person.attributes.containsKey(reason)) {
@@ -1119,11 +1142,17 @@ public abstract class State implements Cloneable {
 
     @Override
     public boolean process(Person person, long time) {
-      String primaryCode = codes.get(0).code;
-      CarePlan careplan = person.record.careplanStart(time, primaryCode);
+      CarePlan careplan;
+      if (this.valueset != null) {
+        Code primaryCode = Terminology.getRandomCode(this.valueset.url);
+        careplan = person.record.careplanStart(time, primaryCode.code);
+        careplan.codes.add(primaryCode);
+      } else {
+        careplan = person.record.careplanStart(time, codes.get(0).code);
+        careplan.codes.addAll(codes);
+      }
       entry = careplan;
       careplan.name = this.name;
-      careplan.codes.addAll(codes);
       careplan.additionalAttributes = this.additionalAttributes;
 
       if (activities != null) {
@@ -1218,13 +1247,18 @@ public abstract class State implements Cloneable {
 
     @Override
     public boolean process(Person person, long time) {
-      String primaryCode = codes.get(0).code;
-      HealthRecord.Procedure procedure = person.record.procedure(time, primaryCode);
-      entry = procedure;
-      procedure.name = this.name;
-      procedure.codes.addAll(codes);
-      procedure.additionalAttributes = this.additionalAttributes;
+      HealthRecord.Procedure procedure;
+      if (this.valueset != null) {
+        Code primaryCode = Terminology.getRandomCode(this.valueset.url);
+        procedure = person.record.procedure(time, primaryCode.code);
+        procedure.codes.add(primaryCode);
+      } else {
+        procedure = person.record.procedure(time, codes.get(0).code);
+        procedure.codes.addAll(codes);
+      }
 
+      procedure.additionalAttributes = this.additionalAttributes;
+      entry = procedure;
       if (reason != null) {
         // "reason" is an attribute or stateName referencing a previous conditionOnset state
         if (person.attributes.containsKey(reason)) {
@@ -1405,7 +1439,6 @@ public abstract class State implements Cloneable {
 
     @Override
     public boolean process(Person person, long time) {
-      String primaryCode = codes.get(0).code;
       Object value = null;
       if (exact != null) {
         value = exact.quantity;
@@ -1420,10 +1453,17 @@ public abstract class State implements Cloneable {
       } else if (threadExpProcessor.get() != null) {
         value = threadExpProcessor.get().evaluate(person, time);
       } 
-      HealthRecord.Observation observation = person.record.observation(time, primaryCode, value);
+      HealthRecord.Observation observation;
+      if (this.valueset != null) {
+        Code primaryCode = Terminology.getRandomCode(this.valueset.url);
+        observation = person.record.observation(time, primaryCode.code, value);
+        observation.codes.add(primaryCode);
+      } else {
+        observation = person.record.observation(time, codes.get(0).code, value);
+        observation.codes.addAll(codes);
+      }
       entry = observation;
       observation.name = this.name;
-      observation.codes.addAll(codes);
       observation.category = category;
       observation.unit = unit;
       observation.additionalAttributes = this.additionalAttributes;
@@ -1472,12 +1512,17 @@ public abstract class State implements Cloneable {
       for (Observation o : observations) {
         o.process(person, time);
       }
-      String primaryCode = codes.get(0).code;
-      HealthRecord.Observation observation =
-          person.record.multiObservation(time, primaryCode, observations.size());
+      HealthRecord.Observation observation;
+      if (this.valueset != null) {
+        Code primaryCode = Terminology.getRandomCode(this.valueset.url);
+        observation = person.record.multiObservation(time, primaryCode.code, observations.size());
+        observation.codes.add(primaryCode);
+      } else {
+        observation = person.record.multiObservation(time, codes.get(0).code, observations.size());
+        observation.codes.addAll(codes);
+      }
       entry = observation;
       observation.name = this.name;
-      observation.codes.addAll(codes);
       observation.category = category;
       observation.additionalAttributes = this.additionalAttributes;
 
@@ -1498,11 +1543,17 @@ public abstract class State implements Cloneable {
       for (Observation o : observations) {
         o.process(person, time);
       }
-      String primaryCode = codes.get(0).code;
-      Report report = person.record.report(time, primaryCode, observations.size());
+      Report report;
+      if (this.valueset != null) {
+        Code primaryCode = Terminology.getRandomCode(this.valueset.url);
+        report = person.record.report(time, primaryCode.code, observations.size());
+        report.codes.add(primaryCode);
+      } else {
+        report = person.record.report(time, codes.get(0).code, observations.size());
+        report.codes.addAll(codes);
+      }
       entry = report;
       report.name = this.name;
-      report.codes.addAll(codes);
       report.additionalAttributes = this.additionalAttributes;
 
       // increment number of labs by respective provider
@@ -1710,7 +1761,9 @@ public abstract class State implements Cloneable {
     @Override
     public boolean process(Person person, long time) {
       Code reason = null;
-      if (codes != null) {
+      if (this.valueset != null) {
+        reason = Terminology.getRandomCode(this.valueset.url);
+      } else if (codes != null) {
         reason = codes.get(0);
       } else if (conditionOnset != null) {
         if (person.hadPriorState(conditionOnset)) {

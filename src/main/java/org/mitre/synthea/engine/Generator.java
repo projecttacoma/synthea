@@ -33,6 +33,7 @@ import org.mitre.synthea.world.agents.Payer;
 import org.mitre.synthea.world.agents.Person;
 import org.mitre.synthea.world.agents.Provider;
 import org.mitre.synthea.world.concepts.Costs;
+import org.mitre.synthea.world.concepts.Terminology;
 import org.mitre.synthea.world.concepts.VitalSign;
 import org.mitre.synthea.world.geography.Demographics;
 import org.mitre.synthea.world.geography.Location;
@@ -222,8 +223,15 @@ public class Generator {
       Module.addModules(options.localModuleDir);
     }
     List<String> coreModuleNames = getModuleNames(Module.getModules(path -> false));
-    List<String> moduleNames = getModuleNames(Module.getModules(modulePredicate)); 
+    List<Module> predicateModules = Module.getModules(modulePredicate);
+    List<String> moduleNames = getModuleNames(predicateModules);
     Costs.loadCostData(); // ensure cost data loads early
+
+    // Load any ValueSets used in the modules to the lookup in Terminology
+    Set<String> valuesetUrls = getValueSetUrls(predicateModules);
+    if (valuesetUrls != null) {
+      Terminology.loadValueSets(valuesetUrls);
+    }
     
     String locationName;
     if (options.city == null) {

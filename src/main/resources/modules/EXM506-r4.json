@@ -59,7 +59,16 @@
     },
     "Hospital_Stay_End": {
       "type": "EncounterEnd",
-      "direct_transition": "Medication_End"
+      "distributed_transition": [
+        {
+          "transition": "Terminal",
+          "distribution": 0.01
+        },
+        {
+          "transition": "Hospital_Encounter_Delay",
+          "distribution": 0.99
+        }
+      ]
     },
     "Age_Guard": {
       "type": "Guard",
@@ -71,19 +80,6 @@
         "value": 0
       },
       "direct_transition": "Hospital_Encounter_Delay"
-    },
-    "Medication_End": {
-      "type": "Simple",
-      "distributed_transition": [
-        {
-          "transition": "Terminal",
-          "distribution": 0.01
-        },
-        {
-          "transition": "Hospital_Encounter_Delay",
-          "distribution": 0.99
-        }
-      ]
     },
     "Hospital_Encounter_Delay": {
       "type": "Delay",

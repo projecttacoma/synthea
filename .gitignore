@@ -25,3 +25,4 @@ src/main/resources/version.txt
 
 # eCQM ValueSets
 src/main/resources/terminology/*
+!src/main/resources/terminology/.gitkeep

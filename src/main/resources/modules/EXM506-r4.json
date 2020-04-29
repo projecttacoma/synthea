@@ -1,0 +1,156 @@
+{
+  "name": "EXM506-r4",
+  "remarks": [
+    "define \"Initial Population\":",
+    "\"Encounter with an Opioid or Benzodiazepine at Discharge\"",
+    "",
+    "define \"Denominator\":",
+    "\"Initial Population\"",
+    "",
+    "define \"Numerator\":",
+    " \"Encounter with Two or More Concurrent Opioids at Discharge\"",
+    " union \"Encounter with a Concurrent Opioid and Benzodiazepine at Discharge\""
+  ],
+  "states": {
+    "Initial": {
+      "type": "Initial",
+      "direct_transition": "Age_Guard"
+    },
+    "Terminal": {
+      "type": "Terminal"
+    },
+    "IPP_Encounter": {
+      "type": "Encounter",
+      "encounter_class": "ambulatory",
+      "reason": "",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": 32485007,
+          "display": "Hospital admission (procedure)"
+        }
+      ],
+      "direct_transition": "Order_Med",
+      "remarks": [
+        "define \"Inpatient Encounter with Age Greater than or Equal to 18\":",
+        "  Global.\"Inpatient Encounter\" EncounterInpatient",
+        "     with [\"Patient\"] BirthDate",
+        "       such that Global.CalendarAgeInYearsAt(FHIRHelpers.ToDate(Patient.birthDate), start of FHIRHelpers.ToInterval(EncounterInpatient.period)) >= 18"
+      ]
+    },
+    "Medication_Discharge_Opiod": {
+      "type": "MedicationOrder",
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": 1010600,
+          "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Oral Strip"
+        }
+      ],
+      "direct_transition": "Med_Delay",
+      "administration": false,
+      "assign_to_attribute": "discharge_med",
+      "remarks": [
+        "define \"Opioid at Discharge\":",
+        "  [\"MedicationRequest\": \"Schedule II and Schedule III Opioids\"] OpioidsDischarge",
+        "      where exists (OpioidsDischarge.category C where FHIRHelpers.ToConcept(C) ~ \"Discharge\")",
+        "          and OpioidsDischarge.intent = 'plan'"
+      ]
+    },
+    "Hospital_Stay_End": {
+      "type": "EncounterEnd",
+      "distributed_transition": [
+        {
+          "transition": "Terminal",
+          "distribution": 0.01
+        },
+        {
+          "transition": "Hospital_Encounter_Delay",
+          "distribution": 0.99
+        }
+      ]
+    },
+    "Age_Guard": {
+      "type": "Guard",
+      "allow": {
+        "condition_type": "Age",
+        "operator": ">=",
+        "quantity": 18,
+        "unit": "years",
+        "value": 0
+      },
+      "direct_transition": "Hospital_Encounter_Delay"
+    },
+    "Hospital_Encounter_Delay": {
+      "type": "Delay",
+      "range": {
+        "low": 0,
+        "high": 3,
+        "unit": "years"
+      },
+      "direct_transition": "IPP_Encounter"
+    },
+    "Medication_Discharge_Benzodiazepine": {
+      "type": "MedicationOrder",
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": 1298088,
+          "display": "Flurazepam Hydrochloride 15 MG Oral Capsule"
+        }
+      ],
+      "direct_transition": "Med_Delay",
+      "assign_to_attribute": "discharge_med",
+      "remarks": [
+        "define \"Benzodiazepine at Discharge\":",
+        "  [\"MedicationRequest\": \"Schedule IV Benzodiazepines\"] BenzodiazepineDischarge",
+        "      where exists (BenzodiazepineDischarge.category C where FHIRHelpers.ToConcept(C) ~ \"Discharge\")",
+        "          and BenzodiazepineDischarge.intent = 'plan'"
+      ]
+    },
+    "Order_Med": {
+      "type": "Simple",
+      "distributed_transition": [
+        {
+          "transition": "Medication_Discharge_Opiod",
+          "distribution": 0.5
+        },
+        {
+          "transition": "Medication_Discharge_Benzodiazepine",
+          "distribution": 0.5
+        }
+      ]
+    },
+    "Hospital_Stay_Delay": {
+      "type": "Delay",
+      "exact": {
+        "quantity": 1,
+        "unit": "days"
+      },
+      "direct_transition": "Order_Med"
+    },
+    "Med_Delay": {
+      "type": "Delay",
+      "range": {
+        "low": 1,
+        "high": 2,
+        "unit": "hours"
+      },
+      "direct_transition": "End_Discharge_Med"
+    },
+    "End_Discharge_Med": {
+      "type": "MedicationEnd",
+      "distributed_transition": [
+        {
+          "transition": "Hospital_Stay_End",
+          "distribution": 0.2
+        },
+        {
+          "transition": "Hospital_Stay_Delay",
+          "distribution": 0.8
+        }
+      ],
+      "referenced_by_attribute": "discharge_med"
+    }
+  }
+}

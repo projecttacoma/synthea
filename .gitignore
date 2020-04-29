@@ -29,3 +29,4 @@ src/main/resources/version.txt
 src/main/resources/map.json
 # eCQM ValueSets
 src/main/resources/terminology/*
+!src/main/resources/terminology/.gitkeep

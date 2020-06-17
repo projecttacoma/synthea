@@ -629,7 +629,8 @@ public abstract class State implements Cloneable, Serializable {
    * The SetAttribute state type sets a specified attribute on the patient entity. In addition to
    * the assign_to_attribute property on MedicationOrder/ConditionOnset/etc states, this state
    * allows for arbitrary text or values to be set on an attribute, or for the attribute to be
-   * reset.
+   * reset. This also allows for a synthea configuration item to be pulled in as the value for the
+   * attribute.
    */
   public static class SetAttribute extends State {
     private String attribute;
@@ -711,6 +712,14 @@ public abstract class State implements Cloneable, Serializable {
         value = data;
       } else if (distribution != null) {
         value = distribution.generate(person);
+      }
+
+      // If a configuration key is defined look for a value from config and use it
+      if (configKey != null) {
+        String configValue = Config.get(configKey);
+        if (configValue != null) {
+          value = configValue;
+        }
       }
 
       if (value != null) {

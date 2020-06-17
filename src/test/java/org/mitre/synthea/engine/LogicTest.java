@@ -191,6 +191,20 @@ public class LogicTest {
     assertTrue(doTest("beforeChristmas2016Test"));
     assertTrue(doTest("afterIndependenceDay2000Test"));
     assertTrue(doTest("isHalloween2007Test"));
+
+    person.attributes.put("ecqm.measurementPeriodStart", "2019-01-01T00:00:00Z");
+    time = TestHelper.timestamp(2017, 10, 31, 0, 0, 0);
+    assertTrue(doTest("beforeDateAttributeTest"));
+    assertFalse(doTest("afterDateAttributeTest"));
+    assertFalse(doTest("isDateAttributeTest"));
+    time = TestHelper.timestamp(2019, 10, 31, 0, 0, 0);
+    assertFalse(doTest("beforeDateAttributeTest"));
+    assertTrue(doTest("afterDateAttributeTest"));
+    assertFalse(doTest("isDateAttributeTest"));
+    time = TestHelper.timestamp(2019, 1, 1, 0, 0, 0);
+    assertTrue(doTest("beforeDateAttributeTest"));
+    assertTrue(doTest("afterDateAttributeTest"));
+    assertTrue(doTest("isDateAttributeTest"));
   }
 
   @Test

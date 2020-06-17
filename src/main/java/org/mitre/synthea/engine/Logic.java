@@ -1,5 +1,6 @@
 package org.mitre.synthea.engine;
 
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
@@ -116,6 +117,7 @@ public abstract class Logic {
     private Integer year;
     private Integer month;
     private DateInput date;
+    private String attribute;
     private String operator;
 
     @Override
@@ -132,7 +134,12 @@ public abstract class Logic {
         testDate.set(Calendar.MILLISECOND,date.millisecond);
         long testTime = testDate.getTimeInMillis();
         return Utilities.compare(time, testTime, operator);
-      } else {
+      } else if (attribute != null) {
+        String timeString = (String) person.attributes.get(attribute);
+        ZonedDateTime dateTime = ZonedDateTime.parse(timeString);
+        long testTime = dateTime.toInstant().toEpochMilli();
+        return Utilities.compare(time, testTime, operator);
+      }else {
         throw new UnsupportedOperationException("Date type "
             + "not currently supported in Date logic.");
       }

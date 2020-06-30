@@ -22,6 +22,14 @@
             "type": "SetAttribute",
             "attribute" : "Maximum Heart Rate",
             "expression": "220 - #{age}",
+            "direct_transition": "Set_Attribute_4"
+        },
+
+        "Set_Attribute_4": {
+            "type": "SetAttribute",
+            "attribute": "Start of Measurement Period",
+            "value": "2019-01-01T00:00:00Z",
+            "config_key": "ecqm.measurementPeriodStart",
             "direct_transition": "Terminal"
         },
 

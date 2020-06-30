@@ -7,7 +7,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -437,6 +439,33 @@ public class StateTest {
     assertTrue(set2.process(person, time));
 
     assertNull(person.attributes.get("Current Opioid Prescription"));
+  }
+
+  @Test
+  public void setAttribute_from_config_use_default() throws Exception {
+    Module module = TestHelper.getFixture("set_attribute.json");
+
+    State set4 = module.getState("Set_Attribute_4");
+    assertTrue(set4.process(person, time));
+
+    // Default from "value" field should be used
+    assertEquals("2019-01-01T00:00:00Z", person.attributes.get("Start of Measurement Period"));
+  }
+
+  @Test
+  public void setAttribute_from_config() throws Exception {
+    URI uri = StateTest.class.getResource("/setattribute.properties").toURI();
+    File file = new File(uri);
+    Config.load(file);
+    assertEquals("2020-01-01T00:00:00Z", Config.get("ecqm.measurementPeriodStart"));
+
+    Module module = TestHelper.getFixture("set_attribute.json");
+
+    State set4 = module.getState("Set_Attribute_4");
+    assertTrue(set4.process(person, time));
+
+    // Value from properties file setattribute.properties should be here.
+    assertEquals("2020-01-01T00:00:00Z", person.attributes.get("Start of Measurement Period"));
   }
 
   @Test

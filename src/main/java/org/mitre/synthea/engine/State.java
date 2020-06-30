@@ -25,6 +25,7 @@ import org.mitre.synthea.engine.Transition.DistributedTransition;
 import org.mitre.synthea.engine.Transition.DistributedTransitionOption;
 import org.mitre.synthea.engine.Transition.LookupTableTransition;
 import org.mitre.synthea.engine.Transition.LookupTableTransitionOption;
+import org.mitre.synthea.helpers.Config;
 import org.mitre.synthea.helpers.ConstantValueGenerator;
 import org.mitre.synthea.helpers.ExpressionProcessor;
 import org.mitre.synthea.helpers.RandomValueGenerator;
@@ -480,11 +481,13 @@ public abstract class State implements Cloneable {
    * The SetAttribute state type sets a specified attribute on the patient entity. In addition to
    * the assign_to_attribute property on MedicationOrder/ConditionOnset/etc states, this state
    * allows for arbitrary text or values to be set on an attribute, or for the attribute to be
-   * reset.
+   * reset. This also allows for a synthea configuration item to be pulled in as the value for the
+   * attribute.
    */
   public static class SetAttribute extends State {
     private String attribute;
     private Object value;
+    private String configKey;
     private String expression;
     private transient ThreadLocal<ExpressionProcessor> threadExpProcessor;
 
@@ -517,6 +520,7 @@ public abstract class State implements Cloneable {
       SetAttribute clone = (SetAttribute) super.clone();
       clone.attribute = attribute;
       clone.value = value;
+      clone.configKey = configKey;
       clone.expression = expression;
       clone.threadExpProcessor = threadExpProcessor;
       return clone;
@@ -526,6 +530,14 @@ public abstract class State implements Cloneable {
     public boolean process(Person person, long time) {
       if (threadExpProcessor.get() != null) {
         value = threadExpProcessor.get().evaluate(person, time);
+      }
+
+      // If a configuration key is defined look for a value from config and use it
+      if (configKey != null) {
+        String configValue = Config.get(configKey);
+        if (configValue != null) {
+          value = configValue;
+        }
       }
 
       if (value != null) {

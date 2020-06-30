@@ -139,7 +139,7 @@ public abstract class Logic {
         ZonedDateTime dateTime = ZonedDateTime.parse(timeString);
         long testTime = dateTime.toInstant().toEpochMilli();
         return Utilities.compare(time, testTime, operator);
-      }else {
+      } else {
         throw new UnsupportedOperationException("Date type "
             + "not currently supported in Date logic.");
       }

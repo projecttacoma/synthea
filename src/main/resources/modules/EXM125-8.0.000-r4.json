@@ -6,6 +6,13 @@
     "states": {
       "Initial": {
         "type": "Initial",
+        "direct_transition": "Set_Measurement_Period"
+      },
+      "Set_Measurement_Period": {
+        "type": "SetAttribute",
+        "attribute": "Start of Measurement Period",
+        "value": "2019-01-01T00:00:00Z",
+        "config_key": "ecqm.measurementPeriodStart",
         "direct_transition": "IPP_Age_Guard"
       },
       "IPP_Age_Guard": {
@@ -26,7 +33,7 @@
               "condition": {
                 "condition_type": "Date",
                 "operator": ">=",
-                "year": 2019
+                "attribute": "Start of Measurement Period"
               },
               "transition": "IPP_Qualifying_Encounter"
             }

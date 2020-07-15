@@ -21,7 +21,20 @@
         "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001",
         "display": "Office Visit"
       },
-      "direct_transition": "Terminal"
+      "direct_transition": "Terminal",
+      "additional_attributes": {
+        "priority": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "260385009",
+              "display": "Negative",
+              "userSelected": true
+            }
+          ],
+          "text": "THIS IS A TEST VALUE FOR PRIORITY"
+        }
+      }
     },
     "NUMER_Colonoscopy_Performed": {
       "type": "Procedure",
@@ -37,7 +50,19 @@
         "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1020",
         "display": "Colonoscopy"
       },
-      "direct_transition": "wait_for_mp_for_encounter"
+      "direct_transition": "wait_for_mp_for_encounter",
+      "additional_attributes": {
+        "reasonCode": [
+          {
+            "text": "Generalized abdominal pain 24 hours. Localized in RIF with rebound and guarding"
+          }
+        ],
+        "followUp": [
+          {
+            "text": "ROS 5 days  - 2013-04-10"
+          }
+        ]
+      }
     },
     "Terminal": {
       "type": "Terminal"

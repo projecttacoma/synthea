@@ -46,7 +46,7 @@ public class App {
    */
   public static void main(String[] args) throws Exception {
     Generator.GeneratorOptions options = new Generator.GeneratorOptions();
-    
+    args = new String[]{ "-a", "51-61", "-m", "EXM130-r4*", "-p", "3" };
     boolean validArgs = true;
     if (args != null && args.length > 0) {
       try {

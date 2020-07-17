@@ -7,7 +7,7 @@
   "states": {
     "Initial": {
       "type": "Initial",
-      "direct_transition": "NUMER_Date_Guard"
+      "direct_transition": "Set_Measurement_Period"
     },
     "IPP_Qualifying_Encounter": {
       "remarks": [
@@ -43,48 +43,30 @@
       "type": "Terminal"
     },
     "wait_for_mp_for_encounter": {
-      "type": "Guard",
-      "allow": {
-        "condition_type": "Date",
-        "operator": "==",
-        "year": 2019,
-        "value": 0
-      },
-      "distributed_transition": [
+      "type": "Simple",
+      "conditional_transition": [
         {
-          "transition": "delay_in_mp",
-          "distribution": 0.75
+          "transition": "IPP_Qualifying_Encounter",
+          "condition": {
+            "condition_type": "Date",
+            "operator": ">=",
+            "attribute": "Start of Measurement Period"
+          }
         },
         {
-          "transition": "Terminal",
-          "distribution": 0.25
+          "transition": "NUMER_delay"
         }
       ]
     },
     "NUMER_delay": {
       "type": "Delay",
-      "direct_transition": "NUMER_Colonoscopy_Performed",
-      "range": {
-        "low": 1,
-        "high": 10,
+      "exact": {
+        "quantity": 1,
         "unit": "years"
-      }
-    },
-    "NUMER_Date_Guard": {
-      "type": "Guard",
-      "allow": {
-        "condition_type": "Date",
-        "operator": ">",
-        "year": 2009
       },
-      "remarks": [
-        "====================================================================================================================",
-        "Global.CalendarAgeInYearsAt(FHIRHelpers.ToDate(Patient.birthDate), start of Measurement Period) in Interval[50, 75]",
-        "===================================================================================================================="
-      ],
       "distributed_transition": [
         {
-          "transition": "NUMER_delay",
+          "transition": "NUMER_Colonoscopy_Performed",
           "distribution": 0.75
         },
         {
@@ -93,14 +75,12 @@
         }
       ]
     },
-    "delay_in_mp": {
-      "type": "Delay",
-      "direct_transition": "IPP_Qualifying_Encounter",
-      "range": {
-        "low": 1,
-        "high": 365,
-        "unit": "days"
-      }
+    "Set_Measurement_Period": {
+      "type": "SetAttribute",
+      "attribute": "Start of Measurement Period",
+      "value": "2019-01-01T00:00:00Z",
+      "config_key": "ecqm.measurementPeriodStart",
+      "direct_transition": "NUMER_delay"
     }
   }
 }

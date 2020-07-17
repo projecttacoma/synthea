@@ -13,6 +13,16 @@
         "attribute": "Start of Measurement Period",
         "value": "2019-01-01T00:00:00Z",
         "config_key": "ecqm.measurementPeriodStart",
+        "direct_transition": "Measurement_Period_Guard"
+      },
+      "Measurement_Period_Guard": {
+        "type": "Guard",
+        "remarks": [],
+        "allow": {
+          "condition_type": "Date",
+          "operator": ">=",
+          "attribute": "Start of Measurement Period"
+        },
         "direct_transition": "IPP_Age_Guard"
       },
       "IPP_Age_Guard": {
@@ -28,16 +38,7 @@
           "quantity": 52,
           "unit": "years"
         },
-        "conditional_transition": [
-            {
-              "condition": {
-                "condition_type": "Date",
-                "operator": ">=",
-                "attribute": "Start of Measurement Period"
-              },
-              "transition": "IPP_Qualifying_Encounter"
-            }
-        ]
+        "direct_transition": "IPP_Qualifying_Encounter"
       },
       "IPP_Qualifying_Encounter": {
         "remarks": [

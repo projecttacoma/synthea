@@ -774,7 +774,7 @@ public class FhirR4 {
     if (encounter.additionalAttributes != null) {
       entry.setResource(setAdditionalAttributes(encounterResource, encounter.additionalAttributes));
     }
-      return entry;
+    return entry;
   }
 
   /**
@@ -2918,7 +2918,8 @@ public class FhirR4 {
    * value will be overwritten.
    * @param resource The resource to which the attributes apply
    * @param additionalAttributes The attributes to apply
-   * @return A new Resource object with the additional attributes
+   * @return A new Resource object with the additional attributes, or the original
+   * Resource object if the attributes cannot be successfully applied
    */
   private static Resource setAdditionalAttributes(Resource resource, JsonObject additionalAttributes) {
     // Serialize the resource to JSON
@@ -2933,7 +2934,6 @@ public class FhirR4 {
     // because the FHIR library only exposes a method to parse a FHIR Resource, and the attributes
     // can be of any FHIR type.
     for (java.util.Map.Entry<String, JsonElement> e : additionalAttributes.entrySet()) {
-      jo.remove(e.getKey());
       jo.add(e.getKey(), e.getValue());
     }
 

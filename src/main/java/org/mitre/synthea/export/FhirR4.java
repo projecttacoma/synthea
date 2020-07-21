@@ -1418,7 +1418,8 @@ public class FhirR4 {
     condition.fullUrl = conditionEntry.getFullUrl();
 
     if (condition.additionalAttributes != null) {
-      conditionEntry.setResource(setAdditionalAttributes(conditionResource, condition.additionalAttributes));
+      conditionEntry.setResource(setAdditionalAttributes(
+        conditionResource, condition.additionalAttributes));
     }
     return conditionEntry;
   }
@@ -1478,7 +1479,8 @@ public class FhirR4 {
     allergy.fullUrl = allergyEntry.getFullUrl();
 
     if (allergy.additionalAttributes != null) {
-      allergyEntry.setResource(setAdditionalAttributes(allergyResource, allergy.additionalAttributes));
+      allergyEntry.setResource(setAdditionalAttributes(
+        allergyResource, allergy.additionalAttributes));
     }
     return allergyEntry;
   }
@@ -1577,7 +1579,8 @@ public class FhirR4 {
     BundleEntryComponent entry = newEntry(bundle, observationResource);
     observation.fullUrl = entry.getFullUrl();
     if (observation.additionalAttributes != null) {
-      entry.setResource(setAdditionalAttributes(observationResource, observation.additionalAttributes));
+      entry.setResource(setAdditionalAttributes(
+        observationResource, observation.additionalAttributes));
     }
     return entry;
   }
@@ -1683,7 +1686,8 @@ public class FhirR4 {
     procedure.fullUrl = procedureEntry.getFullUrl();
 
     if (procedure.additionalAttributes != null) {
-      procedureEntry.setResource(setAdditionalAttributes(procedureResource, procedure.additionalAttributes));
+      procedureEntry.setResource(setAdditionalAttributes(
+        procedureResource, procedure.additionalAttributes));
     }
     return procedureEntry;
   }
@@ -1994,7 +1998,8 @@ public class FhirR4 {
     }
 
     if (medication.additionalAttributes != null) {
-      medicationEntry.setResource(setAdditionalAttributes(medicationResource, medication.additionalAttributes));
+      medicationEntry.setResource(setAdditionalAttributes(
+        medicationResource, medication.additionalAttributes));
     }
 
     return medicationEntry;
@@ -2117,7 +2122,8 @@ public class FhirR4 {
     }
 
     if (report.additionalAttributes != null) {
-      reportResource = (DiagnosticReport)setAdditionalAttributes(reportResource, report.additionalAttributes);
+      reportResource = (DiagnosticReport)setAdditionalAttributes(
+        reportResource, report.additionalAttributes);
     }
     return newEntry(bundle, reportResource);
   }
@@ -2312,7 +2318,8 @@ public class FhirR4 {
         .setDiv(new XhtmlNode(NodeType.Element).setValue(narrative)));
 
     if (carePlan.additionalAttributes != null) {
-      careplanResource = (org.hl7.fhir.r4.model.CarePlan)setAdditionalAttributes(careplanResource, carePlan.additionalAttributes);
+      careplanResource = (org.hl7.fhir.r4.model.CarePlan)setAdditionalAttributes(
+        careplanResource, carePlan.additionalAttributes);
     }
     return newEntry(bundle, careplanResource);
   }
@@ -2921,7 +2928,7 @@ public class FhirR4 {
    * @return A new Resource object with the additional attributes, or the original
    * Resource object if the attributes cannot be successfully applied
    */
-  private static Resource setAdditionalAttributes(Resource resource, JsonObject additionalAttributes) {
+  static Resource setAdditionalAttributes(Resource resource, JsonObject additionalAttributes) {
     // Serialize the resource to JSON
     IParser parser = FHIR_CTX.newJsonParser();
     String encSer = parser.encodeResourceToString(resource);

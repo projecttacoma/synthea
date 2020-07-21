@@ -1,6 +1,8 @@
 package org.mitre.synthea.export;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.gson.Gson;
@@ -768,6 +770,10 @@ public class FhirR4 {
           .setSystem("https://github.com/synthetichealth/synthea")
           .setValue(encounterResource.getId());
     }
+
+    if (encounter.additionalAttributes != null) {
+      entry.setResource(setAdditionalAttributes(encounterResource, encounter.additionalAttributes));
+    }
     return entry;
   }
 
@@ -1411,6 +1417,10 @@ public class FhirR4 {
 
     condition.fullUrl = conditionEntry.getFullUrl();
 
+    if (condition.additionalAttributes != null) {
+      conditionEntry.setResource(setAdditionalAttributes(
+          conditionResource, condition.additionalAttributes));
+    }
     return conditionEntry;
   }
 
@@ -1467,6 +1477,11 @@ public class FhirR4 {
     }
     BundleEntryComponent allergyEntry = newEntry(bundle, allergyResource);
     allergy.fullUrl = allergyEntry.getFullUrl();
+
+    if (allergy.additionalAttributes != null) {
+      allergyEntry.setResource(setAdditionalAttributes(
+          allergyResource, allergy.additionalAttributes));
+    }
     return allergyEntry;
   }
 
@@ -1563,6 +1578,10 @@ public class FhirR4 {
 
     BundleEntryComponent entry = newEntry(bundle, observationResource);
     observation.fullUrl = entry.getFullUrl();
+    if (observation.additionalAttributes != null) {
+      entry.setResource(setAdditionalAttributes(
+          observationResource, observation.additionalAttributes));
+    }
     return entry;
   }
 
@@ -1666,6 +1685,10 @@ public class FhirR4 {
     BundleEntryComponent procedureEntry = newEntry(bundle, procedureResource);
     procedure.fullUrl = procedureEntry.getFullUrl();
 
+    if (procedure.additionalAttributes != null) {
+      procedureEntry.setResource(setAdditionalAttributes(
+          procedureResource, procedure.additionalAttributes));
+    }
     return procedureEntry;
   }
 
@@ -1974,6 +1997,11 @@ public class FhirR4 {
       medicationAdministration(personEntry, bundle, encounterEntry, medication, medicationResource);
     }
 
+    if (medication.additionalAttributes != null) {
+      medicationEntry.setResource(setAdditionalAttributes(
+          medicationResource, medication.additionalAttributes));
+    }
+
     return medicationEntry;
   }
 
@@ -2093,6 +2121,10 @@ public class FhirR4 {
       reportResource.addResult(reference);
     }
 
+    if (report.additionalAttributes != null) {
+      reportResource = (DiagnosticReport)setAdditionalAttributes(
+        reportResource, report.additionalAttributes);
+    }
     return newEntry(bundle, reportResource);
   }
 
@@ -2285,6 +2317,10 @@ public class FhirR4 {
     careplanResource.setText(new Narrative().setStatus(NarrativeStatus.GENERATED)
         .setDiv(new XhtmlNode(NodeType.Element).setValue(narrative)));
 
+    if (carePlan.additionalAttributes != null) {
+      careplanResource = (org.hl7.fhir.r4.model.CarePlan)setAdditionalAttributes(
+        careplanResource, carePlan.additionalAttributes);
+    }
     return newEntry(bundle, careplanResource);
   }
 
@@ -2881,6 +2917,42 @@ public class FhirR4 {
     }
 
     return entry;
+  }
+
+  /**
+   * Apply any additional attributes to a resource. Each attribute must be valid FHIR JSON.
+   * If an additionalAttribute specified already has a value on the resource, the existing
+   * value will be overwritten.
+   * @param resource The resource to which the attributes apply
+   * @param additionalAttributes The attributes to apply
+   * @return A new Resource object with the additional attributes, or the original
+   *    Resource object if the attributes cannot be successfully applied
+   */
+  static Resource setAdditionalAttributes(Resource resource, JsonObject additionalAttributes) {
+    // Serialize the resource to JSON
+    IParser parser = FHIR_CTX.newJsonParser();
+    String encSer = parser.encodeResourceToString(resource);
+    Gson gson = new Gson();
+    JsonElement je = gson.fromJson(encSer, JsonElement.class);
+    JsonObject jo = je.getAsJsonObject();
+
+    // Add each addtional attribute by manipulating the JSON. Overwrite any existing values.
+    // This is done with JSON manipulation, rather than parsing the attribute JSON directly,
+    // because the FHIR library only exposes a method to parse a FHIR Resource, and the attributes
+    // can be of any FHIR type.
+    for (java.util.Map.Entry<String, JsonElement> e : additionalAttributes.entrySet()) {
+      jo.add(e.getKey(), e.getValue());
+    }
+
+    // Parse the JSON object back into a Resource object
+    try {
+      return parser.parseResource(resource.getClass(), jo.toString());
+    } catch (DataFormatException e) {
+      // Parsing failed, so just return the original resource
+      System.err.println("ERROR: Unable apply additionalAttributes. " + e.getMessage());
+      e.printStackTrace();
+      return resource;
+    }
   }
 
   /**

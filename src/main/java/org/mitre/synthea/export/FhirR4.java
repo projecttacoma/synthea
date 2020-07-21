@@ -1419,7 +1419,7 @@ public class FhirR4 {
 
     if (condition.additionalAttributes != null) {
       conditionEntry.setResource(setAdditionalAttributes(
-        conditionResource, condition.additionalAttributes));
+          conditionResource, condition.additionalAttributes));
     }
     return conditionEntry;
   }
@@ -1480,7 +1480,7 @@ public class FhirR4 {
 
     if (allergy.additionalAttributes != null) {
       allergyEntry.setResource(setAdditionalAttributes(
-        allergyResource, allergy.additionalAttributes));
+          allergyResource, allergy.additionalAttributes));
     }
     return allergyEntry;
   }
@@ -1580,7 +1580,7 @@ public class FhirR4 {
     observation.fullUrl = entry.getFullUrl();
     if (observation.additionalAttributes != null) {
       entry.setResource(setAdditionalAttributes(
-        observationResource, observation.additionalAttributes));
+          observationResource, observation.additionalAttributes));
     }
     return entry;
   }
@@ -1687,7 +1687,7 @@ public class FhirR4 {
 
     if (procedure.additionalAttributes != null) {
       procedureEntry.setResource(setAdditionalAttributes(
-        procedureResource, procedure.additionalAttributes));
+          procedureResource, procedure.additionalAttributes));
     }
     return procedureEntry;
   }
@@ -1999,7 +1999,7 @@ public class FhirR4 {
 
     if (medication.additionalAttributes != null) {
       medicationEntry.setResource(setAdditionalAttributes(
-        medicationResource, medication.additionalAttributes));
+          medicationResource, medication.additionalAttributes));
     }
 
     return medicationEntry;
@@ -2926,7 +2926,7 @@ public class FhirR4 {
    * @param resource The resource to which the attributes apply
    * @param additionalAttributes The attributes to apply
    * @return A new Resource object with the additional attributes, or the original
-   * Resource object if the attributes cannot be successfully applied
+   *    Resource object if the attributes cannot be successfully applied
    */
   static Resource setAdditionalAttributes(Resource resource, JsonObject additionalAttributes) {
     // Serialize the resource to JSON

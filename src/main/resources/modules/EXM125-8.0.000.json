@@ -1,7 +1,7 @@
 {
-    "name": "EXM125-r4",
+    "name": "EXM125-8.0.000",
     "remarks": [
-      "EXM125  Based on CMS125v7 - Breast Cancer Screening"
+      "EXM125-8.0.000  Based on CMS125v7 - Breast Cancer Screening"
     ],
     "states": {
       "Initial": {
@@ -63,7 +63,7 @@
         "remarks": [
           "=============================================================================================",
           "[DiagnosticReport: Mammography] Mammogram",
-          "where ( Global.Normalize Interval(Mammogram.effective) ends 27 months or less before day of end of Measurement Period )",
+          "where ( Mammogram.effective ends 27 months or less before day of end of Measurement Period )",
           "and Mammogram.status in { 'final', 'amended', 'corrected', 'appended' }",
           "============================================================================================="
         ],

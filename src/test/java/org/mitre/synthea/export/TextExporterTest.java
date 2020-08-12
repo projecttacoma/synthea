@@ -7,12 +7,20 @@ import java.io.File;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.rules.TemporaryFolder;
 import org.mitre.synthea.TestHelper;
 import org.mitre.synthea.engine.Generator;
 import org.mitre.synthea.helpers.Config;
 import org.mitre.synthea.world.agents.Person;
+import org.mitre.synthea.world.concepts.Terminology;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ Terminology.class })
+@PowerMockIgnore({ "com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*", "javax.management.*", "org.w3c.*", "com.helger.schematron.*", "org.hl7.*", "ca.uhn.fhir.*", "org.apache.commons.*", "com.fasterxml.*" })
 public class TextExporterTest {
   /**
    * Temporary folder for any exported files, guaranteed to be deleted at the end of the test.
@@ -22,6 +30,7 @@ public class TextExporterTest {
   
   @Test
   public void testTextExport() throws Exception {
+    TestHelper.mockTerminology();
     TestHelper.loadTestProperties();
     Generator.DEFAULT_STATE = Config.get("test_state.default", "Massachusetts");
     File tempOutputFolder = tempFolder.newFolder();

@@ -2,6 +2,8 @@ package org.mitre.synthea.export;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -9,13 +11,23 @@ import java.nio.file.Files;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 import org.mitre.synthea.TestHelper;
 import org.mitre.synthea.engine.Generator;
 import org.mitre.synthea.helpers.Config;
 import org.mitre.synthea.helpers.SimpleCSV;
 import org.mitre.synthea.world.agents.Payer;
+import org.mitre.synthea.world.concepts.HealthRecord.Code;
+import org.mitre.synthea.world.concepts.Terminology;
 import org.mitre.synthea.world.geography.Location;
+import org.powermock.api.mockito.*;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ Terminology.class })
+@PowerMockIgnore({ "com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*", "javax.management.*", "org.w3c.*", "com.helger.schematron.*", "org.hl7.*", "ca.uhn.fhir.*" })
 public class CSVExporterTest {
   /**
    * Temporary folder for any exported files, guaranteed to be deleted at the end of the test.
@@ -25,6 +37,10 @@ public class CSVExporterTest {
 
   @Test
   public void testCSVExport() throws Exception {
+    PowerMockito.mockStatic(Terminology.class);
+    PowerMockito.doNothing().when(Terminology.class, "loadValueSets", anySet());
+    PowerMockito.when(Terminology.class, "getRandomCode", anyString())
+        .thenReturn(new Code("mock_system", "mock_code", "mock_display"));
     TestHelper.exportOff();
     TestHelper.loadTestProperties();
     Generator.DEFAULT_STATE = Config.get("test_state.default", "Massachusetts");

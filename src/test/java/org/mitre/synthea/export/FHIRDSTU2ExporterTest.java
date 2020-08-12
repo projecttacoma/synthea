@@ -19,15 +19,22 @@ import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.rules.TemporaryFolder;
 import org.mitre.synthea.TestHelper;
 import org.mitre.synthea.engine.Generator;
 import org.mitre.synthea.helpers.Config;
 import org.mitre.synthea.world.agents.Person;
-
+import org.mitre.synthea.world.concepts.Terminology;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 /**
  * Uses HAPI FHIR project to validate FHIR export. http://hapifhir.io/doc_validation.html
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ Terminology.class })
+@PowerMockIgnore({ "com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*", "javax.management.*", "org.w3c.*", "com.helger.schematron.*", "org.hl7.*", "ca.uhn.fhir.*", "org.apache.commons.*", "com.fasterxml.*" })
 public class FHIRDSTU2ExporterTest {
   /**
    * Temporary folder for any exported files, guaranteed to be deleted at the end of the test.
@@ -59,6 +66,7 @@ public class FHIRDSTU2ExporterTest {
   @Test
   public void testFHIRDSTU2Export() throws Exception {
     TestHelper.loadTestProperties();
+    TestHelper.mockTerminology();
     Generator.DEFAULT_STATE = Config.get("test_state.default", "Massachusetts");
     Config.set("exporter.baseDirectory", tempFolder.newFolder().toString());
 

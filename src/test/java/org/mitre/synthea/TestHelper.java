@@ -1,5 +1,8 @@
 package org.mitre.synthea;
 
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
+
 import java.io.File;
 import java.net.URI;
 import java.nio.file.Path;
@@ -9,6 +12,12 @@ import java.time.ZoneOffset;
 
 import org.mitre.synthea.engine.Module;
 import org.mitre.synthea.helpers.Config;
+import org.mitre.synthea.world.concepts.HealthRecord.Code;
+import org.mitre.synthea.world.concepts.Terminology;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 public abstract class TestHelper {
 
@@ -66,4 +75,12 @@ public abstract class TestHelper {
     return LocalDateTime.of(year, month, day, hr, min, sec).toInstant(ZoneOffset.UTC)
         .toEpochMilli();
   }
+
+  public static void mockTerminology() throws Exception {
+    PowerMockito.mockStatic(Terminology.class);
+    PowerMockito.doNothing().when(Terminology.class, "loadValueSets", anySet());
+    PowerMockito.when(Terminology.class, "getRandomCode", anyString())
+        .thenReturn(new Code("http://snomed.info/sct", "mock_code", "mock_display"));
+  }
+
 }

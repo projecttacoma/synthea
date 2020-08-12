@@ -13,15 +13,23 @@ import org.eclipse.mdht.uml.cda.util.CDAUtil;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 import org.mitre.synthea.TestHelper;
 import org.mitre.synthea.engine.Generator;
 import org.mitre.synthea.helpers.Config;
 import org.mitre.synthea.world.agents.Person;
+import org.mitre.synthea.world.concepts.Terminology;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Uses Model Driven Health Tools (MDHT) to validate exported CCDA R2.1.
  * https://github.com/mdht/mdht-models
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ Terminology.class })
+@PowerMockIgnore({ "com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*", "javax.management.*", "org.w3c.*", "com.helger.schematron.*", "org.hl7.*", "ca.uhn.fhir.*", "org.apache.commons.*" })
 public class CCDAExporterTest {
   
   @Rule
@@ -29,6 +37,7 @@ public class CCDAExporterTest {
   
   @Test
   public void testCCDAExport() throws Exception {
+    TestHelper.mockTerminology();
     TestHelper.loadTestProperties();
     Generator.DEFAULT_STATE = Config.get("test_state.default", "Massachusetts");
     Config.set("exporter.baseDirectory", tempFolder.newFolder().toString());
@@ -61,7 +70,6 @@ public class CCDAExporterTest {
         Exporter.export(person, System.currentTimeMillis());
       }
     }
-
     assertEquals(0, validationErrors.size());
   }
 }

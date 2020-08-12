@@ -7,10 +7,18 @@ import java.util.regex.Pattern;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mitre.synthea.TestHelper;
 import org.mitre.synthea.engine.Generator;
 import org.mitre.synthea.helpers.Config;
+import org.mitre.synthea.world.concepts.Terminology;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ Terminology.class })
+@PowerMockIgnore({ "com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*", "javax.management.*", "org.w3c.*", "com.helger.schematron.*", "org.hl7.*", "ca.uhn.fhir.*", "java.io.*", "java.util.*" })
 public class AppTest {
   private static String testStateDefault;
   private static String testTownDefault;
@@ -33,6 +41,7 @@ public class AppTest {
 
   @Test
   public void testApp() throws Exception {
+    TestHelper.mockTerminology();
     TestHelper.exportOff();
     String[] args = {"-s", "0", "-p", "3", testStateDefault, testTownDefault};
     final PrintStream original = System.out;
@@ -55,6 +64,7 @@ public class AppTest {
 
   @Test
   public void testAppWithGender() throws Exception {
+    TestHelper.mockTerminology();
     TestHelper.exportOff();
     String[] args = {"-s", "0", "-p", "4", "-g", "M"};
     final PrintStream original = System.out;
@@ -76,7 +86,7 @@ public class AppTest {
 
   @Test
   public void testAppWithAges() throws Exception {
-    TestHelper.exportOff();
+    TestHelper.mockTerminology();
     String[] args = {"-s", "0", "-p", "3", "-a", "30-39"};
     final PrintStream original = System.out;
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -99,6 +109,7 @@ public class AppTest {
 
   @Test
   public void testAppWithDifferentLocation() throws Exception {
+    TestHelper.mockTerminology();
     TestHelper.exportOff();
     String[] args = {"-s", "0", "-p", "3", testStateAlternative, testTownAlternative};
     final PrintStream original = System.out;
@@ -118,6 +129,7 @@ public class AppTest {
 
   @Test
   public void testAppWithOverflow() throws Exception {
+    TestHelper.mockTerminology();
     TestHelper.exportOff();
     String[] args = {"-s", "1", "-p", "3", "-o", "false"};
     final PrintStream original = System.out;
@@ -140,6 +152,7 @@ public class AppTest {
 
   @Test
   public void testAppWithModuleFilter() throws Exception {
+    TestHelper.mockTerminology();
     TestHelper.exportOff();
     Config.set("test_key", "pre-test value");
     String[] args = {"-s", "0", "-p", "0", "-m", "copd" + File.pathSeparator + "allerg*"};
@@ -162,6 +175,7 @@ public class AppTest {
 
   @Test
   public void testAppWithConfigSetting() throws Exception {
+    TestHelper.mockTerminology();
     TestHelper.exportOff();
     Config.set("test_key", "pre-test value");
     String[] args = {"-s", "0", "-p", "0",
@@ -174,6 +188,7 @@ public class AppTest {
   
   @Test
   public void testAppWithLocalConfigFile() throws Exception {
+    TestHelper.mockTerminology();
     TestHelper.exportOff();
     Config.set("test.bar", "42");
     String[] args = {"-s", "0", "-p", "0",
@@ -185,6 +200,7 @@ public class AppTest {
   
   @Test
   public void testAppWithLocalModuleDir() throws Exception {
+    TestHelper.mockTerminology();
     TestHelper.exportOff();
     String[] args = {"-s", "0", "-p", "0",
         "-d", "src/test/resources/module", "-m", "copd*"};
@@ -205,6 +221,7 @@ public class AppTest {
   
   @Test
   public void testInvalidArgs() throws Exception {
+    TestHelper.mockTerminology();
     String[] args = {"-s", "foo", "-p", "foo", testStateDefault, testTownDefault};
     final PrintStream original = System.out;
     final PrintStream originalErr = System.err;

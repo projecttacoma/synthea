@@ -10,13 +10,22 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mitre.synthea.TestHelper;
 import org.mitre.synthea.export.Exporter;
 import org.mitre.synthea.export.Exporter.SupportedFhirVersion;
 import org.mitre.synthea.helpers.Config;
+import org.mitre.synthea.helpers.ValueSetResolver;
 import org.mitre.synthea.world.agents.Person;
+import org.mitre.synthea.world.concepts.Terminology;
 import org.mitre.synthea.world.geography.Location;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ ValueSetResolver.class, Terminology.class, Generator.class })
+@PowerMockIgnore({ "com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*", "javax.management.*", "org.w3c.*", "com.helger.schematron.*", "org.hl7.*", "ca.uhn.fhir.*" })
 public class GeneratorTest {
 
   /**
@@ -37,6 +46,7 @@ public class GeneratorTest {
    */
   @Before
   public void before() throws Exception {
+    TestHelper.mockTerminology();
     Config.set("generate.only_dead_patients", "false");
   }
 

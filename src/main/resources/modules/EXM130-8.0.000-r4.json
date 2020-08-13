@@ -44,34 +44,49 @@
     },
     "wait_for_mp_for_encounter": {
       "type": "Simple",
-      "conditional_transition": [
+      "complex_transition": [
         {
-          "transition": "IPP_Qualifying_Encounter",
           "condition": {
             "condition_type": "Date",
             "operator": ">=",
             "attribute": "Start of Measurement Period"
-          }
+          },
+          "distributions": [
+            {
+              "transition": "IPP_Qualifying_Encounter",
+              "distribution": 0.90
+            },
+            {
+              "transition": "Terminal",
+              "distribution": 0.10
+            }
+          ]
         },
         {
-          "transition": "NUMER_delay"
+          "distributions": [
+            {
+              "transition": "NUMER_delay",
+              "distribution": 1
+            }
+          ]
         }
       ]
     },
     "NUMER_delay": {
       "type": "Delay",
-      "exact": {
-        "quantity": 1,
-        "unit": "years"
+      "range": {
+        "low": 3,
+        "high": 9,
+        "unit": "months"
       },
       "distributed_transition": [
         {
           "transition": "NUMER_Colonoscopy_Performed",
-          "distribution": 0.75
+          "distribution": 0.05
         },
         {
           "transition": "wait_for_mp_for_encounter",
-          "distribution": 0.25
+          "distribution": 0.95
         }
       ]
     },

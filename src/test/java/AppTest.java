@@ -28,6 +28,7 @@ public class AppTest {
   @BeforeClass
   public static void testSetup() throws Exception {
     TestHelper.loadTestProperties();
+    TestHelper.generateValuesetTempfiles();
     testStateDefault = Config.get("test_state.default", "Massachusetts");
     testTownDefault = Config.get("test_town.default", "Bedford");
     testStateAlternative = Config.get("test_state.alternative", "Utah");

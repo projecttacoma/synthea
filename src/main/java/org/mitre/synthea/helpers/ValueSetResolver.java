@@ -83,7 +83,7 @@ public class ValueSetResolver {
     this.vsetBundle.setEntry(entries);
   }
 
-  private String matchOid(String input) {
+  public static String matchOid(String input) {
     if (input == null) {
       return null;
     }

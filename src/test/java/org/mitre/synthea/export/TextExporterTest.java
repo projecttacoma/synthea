@@ -23,6 +23,7 @@ public class TextExporterTest {
   @Test
   public void testTextExport() throws Exception {
     TestHelper.loadTestProperties();
+    TestHelper.generateValuesetTempfiles();
     Generator.DEFAULT_STATE = Config.get("test_state.default", "Massachusetts");
     File tempOutputFolder = tempFolder.newFolder();
     Config.set("exporter.baseDirectory", tempOutputFolder.toString());

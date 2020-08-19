@@ -154,6 +154,8 @@ public abstract class TestHelper {
                           .toAbsolutePath();
     Path file = Files.createTempFile(path, "TEMP_VS_FILE", ".json");
 
+    System.err.println("Tempfile location: " + file.toAbsolutePath().toString());
+
     // This shutdown hook will delete the tempfile at the end of the test run
     // or if the test is exited early (via Ctrl+c or other methods)
     Runtime.getRuntime().addShutdownHook(new Thread() {

@@ -129,4 +129,9 @@ public abstract class TestHelper {
   public static long years(long numYears) {
     return Utilities.convertTime("years", numYears);
   }
+
+  private static String readFile(Path path) throws IOException {
+    byte[] fileBytes = Files.readAllBytes(path);
+    return new String(fileBytes);
+  }
 }

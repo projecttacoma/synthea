@@ -170,7 +170,7 @@ public abstract class TestHelper {
   private static Stream<String> getValueSetUrls(Path path) {
     try {
       Pattern valueSetPattern = Pattern.compile("\"url\": ?\"(.+)\",");
-      Matcher matcher = valueSetPattern.matcher(Files.readString(path));
+      Matcher matcher = valueSetPattern.matcher(readFile(path));
       List<String> vs = new ArrayList<String>();
       while (matcher.find()) {
         vs.add(matcher.group(1));
@@ -179,5 +179,10 @@ public abstract class TestHelper {
     } catch (IOException e) {
       return null;
     }
+  }
+
+  private static String readFile(Path path) throws IOException {
+    byte[] fileBytes = Files.readAllBytes(path);
+    return new String(fileBytes);
   }
 }

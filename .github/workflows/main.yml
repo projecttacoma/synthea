@@ -9,7 +9,7 @@ jobs:
     timeout-minutes: 5
     env:
       REPO: https://github.com/CMSgov/synthea/
-      REMOTE_EXCLUDES_URL: https://raw.githubusercontent.com/projecttacoma/synthea/master/.github/gitleaks.toml
+      REMOTE_EXCLUDES_URL: https://raw.githubusercontent.com/projecttacoma/synthea/abacus/.github/gitleaks.toml
       GITLEAKS_VERSION: v4.3.0
     steps:
     - name: Execute Gitleaks

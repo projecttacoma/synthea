@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      REPO: https://github.com/CMSgov/synthea/
+      REPO: https://github.com/projecttacoma/synthea/
       REMOTE_EXCLUDES_URL: https://raw.githubusercontent.com/projecttacoma/synthea/abacus/.github/gitleaks.toml
       GITLEAKS_VERSION: v4.3.0
     steps:

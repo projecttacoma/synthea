@@ -1,0 +1,136 @@
+{
+  "name": "EXM111",
+  "remarks": [
+    "Because the Hospitalization must end in the measurement period, and may last up to 120 days, the initial conditional transition is set to ensure that the module start does not start too late in the year that the hospitalization might end in the following year.",
+    "",
+    "There is a 50% chance that the patient only has <=1 episode, 75%<=2 episodes, 87.5%<=3 episodes, etc., with a diminishing chance at an additional episode as the episode gets closer to the end of the year."
+  ],
+  "states": {
+    "Initial": {
+      "type": "Initial",
+      "conditional_transition": [
+        {
+          "transition": "Encounter: Emergency Department Visit",
+          "condition": {
+            "condition_type": "And",
+            "conditions": [
+              {
+                "condition_type": "Date",
+                "operator": "==",
+                "year": 2019,
+                "value": 0
+              },
+              {
+                "condition_type": "Date",
+                "operator": "<",
+                "month": 9,
+                "value": 0
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "Terminal": {
+      "type": "Terminal",
+      "direct_transition": "Terminal"
+    },
+    "Encounter: Emergency Department Visit": {
+      "type": "Encounter",
+      "direct_transition": "Observation: Emergency Department Evaluation",
+      "codes": [
+        {
+          "code": 4525004,
+          "system": "",
+          "display": "Emergency department patient visit (procedure)",
+          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+        }
+      ],
+      "encounter_class": null
+    },
+    "Observation: Emergency Department Evaluation": {
+      "type": "Observation",
+      "direct_transition": "Time until ED Visit End",
+      "category": "survey",
+      "unit": "",
+      "codes": [
+        {
+          "code": "54094-8",
+          "system": "",
+          "display": "Emergency department Triage note",
+          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.163"
+        }
+      ]
+    },
+    "Encounter Inpatient w/ Diagnosis": {
+      "type": "Encounter",
+      "direct_transition": "Hospitalization Duration",
+      "codes": [
+        {
+          "code": 183452005,
+          "system": "",
+          "display": "Emergency hospital admission (procedure)",
+          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+        }
+      ],
+      "encounter_class": "inpatient"
+    },
+    "ED Visit End": {
+      "type": "EncounterEnd",
+      "distributed_transition": [
+        {
+          "transition": "Encounter Inpatient",
+          "distribution": 0.5
+        },
+        {
+          "transition": "Encounter Inpatient w/ Diagnosis",
+          "distribution": 0.5
+        }
+      ]
+    },
+    "Encounter Inpatient": {
+      "type": "Encounter",
+      "direct_transition": "Hospitalization Duration",
+      "codes": [
+        {
+          "code": 183452005,
+          "system": "",
+          "display": "Emergency hospital admission (procedure)",
+          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+        }
+      ],
+      "encounter_class": "inpatient"
+    },
+    "Time until ED Visit End": {
+      "type": "Delay",
+      "direct_transition": "ED Visit End",
+      "range": {
+        "low": 1,
+        "high": 300,
+        "unit": "minutes"
+      }
+    },
+    "Hospitalization Duration": {
+      "type": "Delay",
+      "direct_transition": "Inpatient End",
+      "range": {
+        "low": 1,
+        "high": 120,
+        "unit": "days"
+      }
+    },
+    "Inpatient End": {
+      "type": "EncounterEnd",
+      "distributed_transition": [
+        {
+          "transition": "Terminal",
+          "distribution": 0.5
+        },
+        {
+          "transition": "Initial",
+          "distribution": 0.5
+        }
+      ]
+    }
+  }
+}

@@ -10,7 +10,7 @@
       "type": "Initial",
       "conditional_transition": [
         {
-          "transition": "Encounter: Emergency Department Visit",
+          "transition": "Measurement_Period",
           "condition": {
             "condition_type": "And",
             "conditions": [
@@ -46,7 +46,25 @@
           "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
         }
       ],
-      "encounter_class": null
+      "encounter_class": null,
+      "additional_attributes": {
+        "location" : [{ 
+          "location" : {
+            "resourceType" : "Location", 
+            "type" : [{ 
+              "coding" : [{
+                "system" : "http://snomed.info/sct",
+                "code" : "4525004",
+                "display" : "Emergency department patient visit (procedure)"
+              }]
+            }]
+          },
+          "period" : {
+            "start" : "2019-01-01T00:00:00.000Z",
+            "end" : "2019-01-01T00:01:00.000Z"
+          }
+        }]
+      }
     },
     "Observation: Emergency Department Evaluation": {
       "type": "Observation",
@@ -60,33 +78,18 @@
           "display": "Emergency department Triage note",
           "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.163"
         }
-      ]
-    },
-    "Encounter Inpatient w/ Diagnosis": {
-      "type": "Encounter",
-      "direct_transition": "Hospitalization Duration",
-      "codes": [
-        {
-          "code": 183452005,
-          "system": "",
-          "display": "Emergency hospital admission (procedure)",
-          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
-        }
       ],
-      "encounter_class": "inpatient"
+      "remarks": [
+        "{",
+        "      \"system\": \"SNOMEDCT\",",
+        "      \"code\": \"183767005\",",
+        "      \"display\": \"Listed for admission to hospital (finding)\"",
+        "    }"
+      ]
     },
     "ED Visit End": {
       "type": "EncounterEnd",
-      "distributed_transition": [
-        {
-          "transition": "Encounter Inpatient",
-          "distribution": 0.5
-        },
-        {
-          "transition": "Encounter Inpatient w/ Diagnosis",
-          "distribution": 0.5
-        }
-      ]
+      "direct_transition": "Encounter Inpatient"
     },
     "Encounter Inpatient": {
       "type": "Encounter",
@@ -131,6 +134,33 @@
           "distribution": 0.5
         }
       ]
+    },
+    "Measurement_Period": {
+      "type": "Simple",
+      "distributed_transition": [
+        {
+          "transition": "Diagnosis: Psychiatric/Mental Health Diagnosis",
+          "distribution": 0.5
+        },
+        {
+          "transition": "Encounter: Emergency Department Visit",
+          "distribution": 0.5
+        }
+      ]
+    },
+    "Diagnosis: Psychiatric/Mental Health Diagnosis": {
+      "type": "ConditionOnset",
+      "assign_to_attribute": "",
+      "target_encounter": "Encounter Inpatient",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": 109006,
+          "display": "Anxiety disorder of childhood OR adolescence (disorder)",
+          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.299"
+        }
+      ],
+      "direct_transition": "Encounter: Emergency Department Visit"
     }
   }
 }

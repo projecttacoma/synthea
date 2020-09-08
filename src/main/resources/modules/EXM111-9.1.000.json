@@ -8,28 +8,7 @@
   "states": {
     "Initial": {
       "type": "Initial",
-      "conditional_transition": [
-        {
-          "transition": "Measurement_Period",
-          "condition": {
-            "condition_type": "And",
-            "conditions": [
-              {
-                "condition_type": "Date",
-                "operator": "==",
-                "year": 2019,
-                "value": 0
-              },
-              {
-                "condition_type": "Date",
-                "operator": "<",
-                "month": 9,
-                "value": 0
-              }
-            ]
-          }
-        }
-      ]
+      "direct_transition": "Measurement_Period"
     },
     "Terminal": {
       "type": "Terminal",
@@ -48,22 +27,30 @@
       ],
       "encounter_class": null,
       "additional_attributes": {
-        "location" : [{ 
-          "location" : {
-            "resourceType" : "Location", 
-            "type" : [{ 
-              "coding" : [{
-                "system" : "http://snomed.info/sct",
-                "code" : "4525004",
-                "display" : "Emergency department patient visit (procedure)"
-              }]
-            }]
-          },
-          "period" : {
-            "start" : "2019-01-01T00:00:00.000Z",
-            "end" : "2019-01-01T00:01:00.000Z"
+        "contained": [
+          {
+            "resourceType": "Location",
+            "id": "default-emergency-department-location",
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "4525004",
+                    "display": "Emergency department patient visit (procedure)"
+                  }
+                ]
+              }
+            ]
           }
-        }]
+        ],
+        "location": [
+          {
+            "location": {
+              "reference": "#default-emergency-department-location"
+            }
+          }
+        ]
       }
     },
     "Observation: Emergency Department Evaluation": {
@@ -136,14 +123,31 @@
       ]
     },
     "Measurement_Period": {
-      "type": "Simple",
+      "type": "Guard",
+      "allow": {
+        "condition_type": "And",
+        "conditions": [
+          {
+            "condition_type": "Date",
+            "operator": "==",
+            "year": 2019,
+            "value": 0
+          },
+          {
+            "condition_type": "Date",
+            "operator": "<",
+            "month": 9,
+            "value": 0
+          }
+        ]
+      },
       "distributed_transition": [
         {
           "transition": "Diagnosis: Psychiatric/Mental Health Diagnosis",
           "distribution": 0.5
         },
         {
-          "transition": "Encounter: Emergency Department Visit",
+          "transition": "Pre-ED Visit",
           "distribution": 0.5
         }
       ]
@@ -160,7 +164,70 @@
           "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.299"
         }
       ],
-      "direct_transition": "Encounter: Emergency Department Visit"
+      "direct_transition": "Pre-ED Visit"
+    },
+    "Pre-ED Visit": {
+      "type": "Simple",
+      "distributed_transition": [
+        {
+          "transition": "Encounter: Emergency Department Visit",
+          "distribution": 0.75
+        },
+        {
+          "transition": "Encounter: Emergency Department Visit w/ Hospital Setting",
+          "distribution": 0.25
+        }
+      ]
+    },
+    "Encounter: Emergency Department Visit w/ Hospital Setting": {
+      "type": "Encounter",
+      "codes": [
+        {
+          "code": 4525004,
+          "system": "",
+          "display": "Emergency department patient visit (procedure)",
+          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+        }
+      ],
+      "encounter_class": null,
+      "additional_attributes": {
+        "contained": [
+          {
+            "resourceType": "Location",
+            "id": "default-emergency-department-location",
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "4525004",
+                    "display": "Emergency department patient visit (procedure)"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "location": [
+          {
+            "location": {
+              "reference": "#default-emergency-department-location"
+            }
+          }
+        ],
+        "hospitalization" : {
+          "admitSource" : {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "22232009",
+                "display": "Hospital (environment)"
+              }
+            ]
+          }
+        }
+      },
+      "direct_transition": "Observation: Emergency Department Evaluation"
     }
   }
 }

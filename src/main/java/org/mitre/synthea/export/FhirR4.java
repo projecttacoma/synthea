@@ -69,6 +69,7 @@ import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent
 import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Dosage.DosageDoseAndRateComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterHospitalizationComponent;
+import org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
@@ -772,8 +773,24 @@ public class FhirR4 {
     }
 
     if (encounter.additionalAttributes != null) {
-      entry.setResource(setAdditionalAttributes(encounterResource, encounter.additionalAttributes));
+      Resource res = setAdditionalAttributes(encounterResource, encounter.additionalAttributes);
+      encounterResource = (org.hl7.fhir.r4.model.Encounter) res;
+      /* --- additional attributes export adjustments --- */
+      // location adjustment
+      if (encounterResource.getLocation() != null){
+        // check if there are any locations that have been added to the encounter
+        for (EncounterLocationComponent loc : encounterResource.getLocation()){
+          // don't override existing location periods
+          if (loc.getPeriod().getEnd() == null && loc.getPeriod().getStart() == null){
+            loc.setPeriod(new Period()
+              .setStart(encounterResource.getPeriod().getStart())
+              .setEnd(encounterResource.getPeriod().getEnd()));
+          }
+        }
+      }
+      entry.setResource(res);
     }
+
     return entry;
   }
 

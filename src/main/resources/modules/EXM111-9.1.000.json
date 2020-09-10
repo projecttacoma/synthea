@@ -11,8 +11,7 @@
       "direct_transition": "Measurement_Period"
     },
     "Terminal": {
-      "type": "Terminal",
-      "direct_transition": "Terminal"
+      "type": "Terminal"
     },
     "Encounter: Emergency Department Visit": {
       "type": "Encounter",
@@ -52,27 +51,6 @@
           }
         ]
       }
-    },
-    "Observation: Emergency Department Evaluation": {
-      "type": "Observation",
-      "direct_transition": "Time until ED Visit End",
-      "category": "survey",
-      "unit": "",
-      "codes": [
-        {
-          "code": "54094-8",
-          "system": "",
-          "display": "Emergency department Triage note",
-          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.163"
-        }
-      ],
-      "remarks": [
-        "{",
-        "      \"system\": \"SNOMEDCT\",",
-        "      \"code\": \"183767005\",",
-        "      \"display\": \"Listed for admission to hospital (finding)\"",
-        "    }"
-      ]
     },
     "ED Visit End": {
       "type": "EncounterEnd",
@@ -215,8 +193,8 @@
             }
           }
         ],
-        "hospitalization" : {
-          "admitSource" : {
+        "hospitalization": {
+          "admitSource": {
             "coding": [
               {
                 "system": "http://snomed.info/sct",
@@ -228,6 +206,26 @@
         }
       },
       "direct_transition": "Observation: Emergency Department Evaluation"
+    },
+    "Observation: Emergency Department Evaluation": {
+      "type": "Observation",
+      "category": "survey",
+      "unit": "",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "54094-8",
+          "display": "Emergency department Triage note",
+          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.163"
+        }
+      ],
+      "direct_transition": "Time until ED Visit End",
+      "value_code": {
+        "system": "SNOMED-CT",
+        "code": 183767005,
+        "display": "Listed for admission to hospital (finding)",
+        "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.164"
+      }
     }
   }
 }

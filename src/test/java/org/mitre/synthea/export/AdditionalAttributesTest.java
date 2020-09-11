@@ -27,7 +27,7 @@ public class AdditionalAttributesTest {
     JsonObject additionalAttributes = parseJsonFixture(
         "src/test/resources/export/additional_attributes_encounter.json");
     Encounter encounter = new Encounter();
-    encounter = (Encounter)FhirR4.setAdditionalAttributes(encounter, additionalAttributes);
+    encounter = (Encounter)FhirR4.setAdditionalAttributes(encounter, additionalAttributes, null);
     CodeableConcept priority = encounter.getPriority();
     assertNotNull(priority);
     List<Coding> coding = priority.getCoding();
@@ -47,7 +47,7 @@ public class AdditionalAttributesTest {
         "src/test/resources/export/additional_attributes_encounter_invalid.json");
     Encounter encounter = new Encounter();
     Encounter encounter2 = (Encounter)FhirR4.setAdditionalAttributes(
-        encounter, additionalAttributes);
+        encounter, additionalAttributes, null);
     assertTrue(encounter2.equals(encounter));
   }
 

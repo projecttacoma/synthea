@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -813,11 +814,11 @@ public class FhirR4 {
     }
 
     if (encounter.additionalAttributes != null) {
-      Resource res = setAdditionalAttributes(encounterResource, encounter.additionalAttributes);
+      Resource res = setAdditionalAttributes(encounterResource, encounter.additionalAttributes, bundle);
       encounterResource = (org.hl7.fhir.r4.model.Encounter) res;
       /* --- additional attributes export adjustments --- */
       // location adjustment
-      if (encounterResource.getLocation() != null){
+      if (encounterResource.getLocation() != null) {
         // check if there are any locations that have been added to the encounter
         for (EncounterLocationComponent loc : encounterResource.getLocation()){
           // don't override existing location periods
@@ -1484,7 +1485,7 @@ public class FhirR4 {
 
     if (condition.additionalAttributes != null) {
       conditionEntry.setResource(setAdditionalAttributes(
-          conditionResource, condition.additionalAttributes));
+          conditionResource, condition.additionalAttributes, bundle));
     }
     return conditionEntry;
   }
@@ -1547,7 +1548,7 @@ public class FhirR4 {
 
     if (allergy.additionalAttributes != null) {
       allergyEntry.setResource(setAdditionalAttributes(
-          allergyResource, allergy.additionalAttributes));
+          allergyResource, allergy.additionalAttributes, bundle));
     }
     return allergyEntry;
   }
@@ -1649,7 +1650,7 @@ public class FhirR4 {
     observation.fullUrl = entry.getFullUrl();
     if (observation.additionalAttributes != null) {
       entry.setResource(setAdditionalAttributes(
-          observationResource, observation.additionalAttributes));
+          observationResource, observation.additionalAttributes, bundle));
     }
     return entry;
   }
@@ -1798,7 +1799,7 @@ public class FhirR4 {
 
     if (procedure.additionalAttributes != null) {
       procedureEntry.setResource(setAdditionalAttributes(
-          procedureResource, procedure.additionalAttributes));
+          procedureResource, procedure.additionalAttributes, bundle));
     }
     return procedureEntry;
   }
@@ -2168,7 +2169,7 @@ public class FhirR4 {
 
     if (medication.additionalAttributes != null) {
       medicationEntry.setResource(setAdditionalAttributes(
-          medicationResource, medication.additionalAttributes));
+          medicationResource, medication.additionalAttributes, bundle));
     }
 
     return medicationEntry;
@@ -2496,7 +2497,7 @@ public class FhirR4 {
 
     if (carePlan.additionalAttributes != null) {
       careplanResource = (org.hl7.fhir.r4.model.CarePlan)setAdditionalAttributes(
-        careplanResource, carePlan.additionalAttributes);
+        careplanResource, carePlan.additionalAttributes, bundle);
     }
     return newEntry(bundle, careplanResource);
   }
@@ -3208,7 +3209,7 @@ public class FhirR4 {
    * @return A new Resource object with the additional attributes, or the original
    *    Resource object if the attributes cannot be successfully applied
    */
-  static Resource setAdditionalAttributes(Resource resource, JsonObject additionalAttributes) {
+  static Resource setAdditionalAttributes(Resource resource, JsonObject additionalAttributes, Bundle bundle) {
     // Serialize the resource to JSON
     IParser parser = FHIR_CTX.newJsonParser();
     String encSer = parser.encodeResourceToString(resource);
@@ -3216,12 +3217,34 @@ public class FhirR4 {
     JsonElement je = gson.fromJson(encSer, JsonElement.class);
     JsonObject jo = je.getAsJsonObject();
 
+    // Populate map of replacement UUIDs
+    HashMap<String, String> uuids = new HashMap<String, String>();
+    findUUIDsToReplace(additionalAttributes, uuids);
+
+    // Replace <<UUID-N>> with new UUIDs
+    if (uuids.size() > 0) {
+      String jsonString = gson.toJson(additionalAttributes);
+      for (Map.Entry<String, String> e : uuids.entrySet()) {
+        jsonString = jsonString.replace(e.getKey(), e.getValue());
+      }
+      additionalAttributes = gson.fromJson(jsonString, JsonObject.class);
+    }
+
     // Add each addtional attribute by manipulating the JSON. Overwrite any existing values.
     // This is done with JSON manipulation, rather than parsing the attribute JSON directly,
     // because the FHIR library only exposes a method to parse a FHIR Resource, and the attributes
     // can be of any FHIR type.
-    for (java.util.Map.Entry<String, JsonElement> e : additionalAttributes.entrySet()) {
-      jo.add(e.getKey(), e.getValue());
+    for (Map.Entry<String, JsonElement> e : additionalAttributes.entrySet()) {
+      // If it is a "contained" attribute. Pull out the resources for addition to the patient bundle.
+      if (e.getKey().equals("contained")) {
+        JsonArray contained = e.getValue().getAsJsonArray();
+        for (JsonElement resourceJson : contained) {
+          Resource r = (Resource) parser.parseResource(resourceJson.toString());
+          newEntry(bundle, r, r.getIdElement().getIdPart());
+        }
+      } else {
+        jo.add(e.getKey(), e.getValue());
+      }
     }
 
     // Parse the JSON object back into a Resource object
@@ -3232,6 +3255,39 @@ public class FhirR4 {
       System.err.println("ERROR: Unable apply additionalAttributes. " + e.getMessage());
       e.printStackTrace();
       return resource;
+    }
+  }
+
+  private static final Pattern UUID_PATTERN = Pattern.compile("REPLACE-UUID-[0-9]+");
+
+  private static void findUUIDsToReplace(JsonElement json, HashMap<String, String> uuids) {
+    if (json.isJsonArray()) {
+      for (JsonElement e : json.getAsJsonArray()) {
+        findUUIDsToReplace(e, uuids);
+      }
+    } else if (json.isJsonObject()) {
+      for (Map.Entry<String, JsonElement> e : json.getAsJsonObject().entrySet()) {
+        if (e.getValue().isJsonPrimitive() && e.getValue().getAsJsonPrimitive().isString()) {
+          String str = e.getValue().getAsString();
+          Matcher m = UUID_PATTERN.matcher(str);
+          while (m.find()) {
+            String match = m.group(0);
+            createOrUseUUID(match, uuids);
+          }
+        } else {
+          findUUIDsToReplace(e.getValue(), uuids);
+        }
+      }
+    }
+  }
+
+  private static String createOrUseUUID(String uuidMatch, HashMap<String, String> uuids) {
+    if (uuids.containsKey(uuidMatch)) {
+      return uuids.get(uuidMatch);
+    } else {
+      String newUUID = UUID.randomUUID().toString();
+      uuids.put(uuidMatch, newUUID);
+      return newUUID;
     }
   }
 

@@ -19,7 +19,7 @@
       "codes": [
         {
           "code": 4525004,
-          "system": "",
+          "system": "SNOMED-CT",
           "display": "Emergency department patient visit (procedure)",
           "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
         }
@@ -29,7 +29,7 @@
         "contained": [
           {
             "resourceType": "Location",
-            "id": "default-emergency-department-location",
+            "id": "REPLACE-UUID-0",
             "type": [
               {
                 "coding": [
@@ -46,7 +46,7 @@
         "location": [
           {
             "location": {
-              "reference": "#default-emergency-department-location"
+              "reference": "Location/REPLACE-UUID-0"
             }
           }
         ]
@@ -162,7 +162,7 @@
       "codes": [
         {
           "code": 4525004,
-          "system": "",
+          "system": "SNOMED-CT",
           "display": "Emergency department patient visit (procedure)",
           "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
         }
@@ -172,7 +172,7 @@
         "contained": [
           {
             "resourceType": "Location",
-            "id": "default-emergency-department-location",
+            "id": "REPLACE-UUID-0",
             "type": [
               {
                 "coding": [
@@ -189,7 +189,7 @@
         "location": [
           {
             "location": {
-              "reference": "#default-emergency-department-location"
+              "reference": "Location/REPLACE-UUID-0"
             }
           }
         ],

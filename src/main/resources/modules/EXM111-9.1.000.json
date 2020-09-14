@@ -13,93 +13,6 @@
     "Terminal": {
       "type": "Terminal"
     },
-    "Encounter: Emergency Department Visit": {
-      "type": "Encounter",
-      "direct_transition": "Observation: Emergency Department Evaluation",
-      "codes": [
-        {
-          "code": 4525004,
-          "system": "SNOMED-CT",
-          "display": "Emergency department patient visit (procedure)",
-          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
-        }
-      ],
-      "encounter_class": null,
-      "additional_attributes": {
-        "contained": [
-          {
-            "resourceType": "Location",
-            "id": "REPLACE-UUID-0",
-            "type": [
-              {
-                "coding": [
-                  {
-                    "system": "http://snomed.info/sct",
-                    "code": "4525004",
-                    "display": "Emergency department patient visit (procedure)"
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "location": [
-          {
-            "location": {
-              "reference": "Location/REPLACE-UUID-0"
-            }
-          }
-        ]
-      }
-    },
-    "ED Visit End": {
-      "type": "EncounterEnd",
-      "direct_transition": "Encounter Inpatient"
-    },
-    "Encounter Inpatient": {
-      "type": "Encounter",
-      "direct_transition": "Hospitalization Duration",
-      "codes": [
-        {
-          "code": 183452005,
-          "system": "",
-          "display": "Emergency hospital admission (procedure)",
-          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
-        }
-      ],
-      "encounter_class": "inpatient"
-    },
-    "Time until ED Visit End": {
-      "type": "Delay",
-      "direct_transition": "ED Visit End",
-      "range": {
-        "low": 1,
-        "high": 300,
-        "unit": "minutes"
-      }
-    },
-    "Hospitalization Duration": {
-      "type": "Delay",
-      "direct_transition": "Inpatient End",
-      "range": {
-        "low": 1,
-        "high": 120,
-        "unit": "days"
-      }
-    },
-    "Inpatient End": {
-      "type": "EncounterEnd",
-      "distributed_transition": [
-        {
-          "transition": "Terminal",
-          "distribution": 0.5
-        },
-        {
-          "transition": "Initial",
-          "distribution": 0.5
-        }
-      ]
-    },
     "Measurement_Period": {
       "type": "Guard",
       "allow": {
@@ -121,19 +34,19 @@
       },
       "distributed_transition": [
         {
-          "transition": "Diagnosis: Psychiatric/Mental Health Diagnosis",
+          "transition": "Diagnosis_Psychiatric/Mental_Health_Diagnosis",
           "distribution": 0.5
         },
         {
-          "transition": "Pre-ED Visit",
+          "transition": "Pre-ED_Visit",
           "distribution": 0.5
         }
       ]
     },
-    "Diagnosis: Psychiatric/Mental Health Diagnosis": {
+    "Diagnosis_Psychiatric/Mental_Health_Diagnosis": {
       "type": "ConditionOnset",
       "assign_to_attribute": "",
-      "target_encounter": "Encounter Inpatient",
+      "target_encounter": "Encounter_Inpatient",
       "codes": [
         {
           "system": "SNOMED-CT",
@@ -142,22 +55,90 @@
           "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.299"
         }
       ],
-      "direct_transition": "Pre-ED Visit"
+      "direct_transition": "Pre-ED_Visit"
     },
-    "Pre-ED Visit": {
+    "Pre-ED_Visit": {
       "type": "Simple",
       "distributed_transition": [
         {
-          "transition": "Encounter: Emergency Department Visit",
+          "transition": "Encounter_Emergency_Department_Visit",
           "distribution": 0.75
         },
         {
-          "transition": "Encounter: Emergency Department Visit w/ Hospital Setting",
+          "transition": "Encounter_Emergency_Department_Visit_w/_Hospital_Setting",
           "distribution": 0.25
         }
       ]
     },
-    "Encounter: Emergency Department Visit w/ Hospital Setting": {
+    "Inpatient_End": {
+      "type": "EncounterEnd",
+      "distributed_transition": [
+        {
+          "transition": "Terminal",
+          "distribution": 0.5
+        },
+        {
+          "transition": "Initial",
+          "distribution": 0.5
+        }
+      ]
+    },
+    "Hospitalization_Duration": {
+      "type": "Delay",
+      "direct_transition": "Inpatient_End",
+      "range": {
+        "low": 1,
+        "high": 120,
+        "unit": "days"
+      }
+    },
+    "Encounter_Inpatient": {
+      "type": "Encounter",
+      "direct_transition": "Hospitalization_Duration",
+      "codes": [
+        {
+          "code": 183452005,
+          "system": "",
+          "display": "Emergency hospital admission (procedure)",
+          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+        }
+      ],
+      "encounter_class": "inpatient"
+    },
+    "ED_Visit_End": {
+      "type": "EncounterEnd",
+      "direct_transition": "Encounter_Inpatient"
+    },
+    "Time_until_ED_Visit_End": {
+      "type": "Delay",
+      "direct_transition": "ED_Visit_End",
+      "range": {
+        "low": 1,
+        "high": 300,
+        "unit": "minutes"
+      }
+    },
+    "Observation_Emergency_Department_Evaluation": {
+      "type": "Observation",
+      "category": "survey",
+      "unit": "",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "54094-8",
+          "display": "Emergency department Triage note",
+          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.163"
+        }
+      ],
+      "direct_transition": "Time_until_ED_Visit_End",
+      "value_code": {
+        "system": "SNOMED-CT",
+        "code": 183767005,
+        "display": "Listed for admission to hospital (finding)",
+        "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.164"
+      }
+    },
+    "Encounter_Emergency_Department_Visit_w/_Hospital_Setting": {
       "type": "Encounter",
       "codes": [
         {
@@ -205,26 +186,45 @@
           }
         }
       },
-      "direct_transition": "Observation: Emergency Department Evaluation"
+      "direct_transition": "Observation_Emergency_Department_Evaluation"
     },
-    "Observation: Emergency Department Evaluation": {
-      "type": "Observation",
-      "category": "survey",
-      "unit": "",
+    "Encounter_Emergency_Department_Visit": {
+      "type": "Encounter",
+      "direct_transition": "Observation_Emergency_Department_Evaluation",
       "codes": [
         {
-          "system": "LOINC",
-          "code": "54094-8",
-          "display": "Emergency department Triage note",
-          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.163"
+          "code": 4525004,
+          "system": "SNOMED-CT",
+          "display": "Emergency department patient visit (procedure)",
+          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
         }
       ],
-      "direct_transition": "Time until ED Visit End",
-      "value_code": {
-        "system": "SNOMED-CT",
-        "code": 183767005,
-        "display": "Listed for admission to hospital (finding)",
-        "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.164"
+      "encounter_class": null,
+      "additional_attributes": {
+        "contained": [
+          {
+            "resourceType": "Location",
+            "id": "REPLACE-UUID-0",
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "4525004",
+                    "display": "Emergency department patient visit (procedure)"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "location": [
+          {
+            "location": {
+              "reference": "Location/REPLACE-UUID-0"
+            }
+          }
+        ]
       }
     }
   }

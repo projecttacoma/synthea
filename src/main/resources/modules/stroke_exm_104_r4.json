@@ -43,7 +43,7 @@
         "unit": "years",
         "value": 0
       },
-      "direct_transition": "Stroke_Delay"
+      "direct_transition": "Measurement_Period_Guard"
     },
     "Stroke_Delay": {
       "type": "Delay",
@@ -211,6 +211,16 @@
           "transition": "Second_Stroke"
         }
       ]
+    },
+    "Measurement_Period_Guard": {
+      "type": "Guard",
+      "allow": {
+        "condition_type": "Date",
+        "operator": "==",
+        "year": 2016,
+        "value": 0
+      },
+      "direct_transition": "Stroke_Delay"
     }
   },
   "gmf_version": 2

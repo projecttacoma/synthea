@@ -217,7 +217,7 @@
       "allow": {
         "condition_type": "Date",
         "operator": "==",
-        "year": 2016,
+        "year": 2019,
         "value": 0
       },
       "direct_transition": "Stroke_Delay"

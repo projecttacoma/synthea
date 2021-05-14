@@ -1,7 +1,8 @@
 {
   "name": "exm_104_r4",
   "remarks": [
-    "a non clinically-accurate stroke encounter module, for use with EXM104"
+    "a non clinically-accurate stroke encounter module, for use with EXM104",
+    "If the patient has already had a second stroke, transition to terminal."
   ],
   "states": {
     "Initial": {
@@ -42,7 +43,7 @@
         "unit": "years",
         "value": 0
       },
-      "direct_transition": "Stroke_Delay"
+      "direct_transition": "Measurement_Period_Guard"
     },
     "Stroke_Delay": {
       "type": "Delay",
@@ -134,11 +135,11 @@
       "distributed_transition": [
         {
           "transition": "Terminal",
-          "distribution": 0.01
+          "distribution": 0.8
         },
         {
-          "transition": "Stroke_Delay",
-          "distribution": 0.99
+          "transition": "Another_Stroke",
+          "distribution": 0.2
         }
       ],
       "medication_order": "Medication_discharge_antithrombotic"
@@ -187,6 +188,40 @@
         "high": 2,
         "unit": "hours"
       }
+    },
+    "Second_Stroke": {
+      "type": "SetAttribute",
+      "attribute": "second_stroke",
+      "direct_transition": "Stroke_Delay",
+      "value": true
+    },
+    "Another_Stroke": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "transition": "Terminal",
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "second_stroke",
+            "operator": "==",
+            "value": true
+          }
+        },
+        {
+          "transition": "Second_Stroke"
+        }
+      ]
+    },
+    "Measurement_Period_Guard": {
+      "type": "Guard",
+      "allow": {
+        "condition_type": "Date",
+        "operator": "==",
+        "year": 2019,
+        "value": 0
+      },
+      "direct_transition": "Stroke_Delay"
     }
-  }
+  },
+  "gmf_version": 2
 }

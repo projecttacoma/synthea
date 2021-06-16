@@ -1,6 +1,7 @@
 package org.mitre.synthea.engine;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
@@ -19,9 +20,9 @@ import org.mitre.synthea.world.concepts.HealthRecord.Medication;
 
 /**
  * Logic represents any portion of a generic module that requires a logical
- * expression. This class is stateless, and calling 'test' on an instance
- * must not modify state as instances of Logic within Modules are shared
- * across the population.
+ * expression. This class is stateless, and calling 'test' on an instance must
+ * not modify state as instances of Logic within Modules are shared across the
+ * population.
  */
 public abstract class Logic implements Serializable {
   public List<String> remarks;
@@ -30,22 +31,23 @@ public abstract class Logic implements Serializable {
    * Test whether the logic is true for the given person at the given time.
    *
    * @param person Person to execute logic against
-   * @param time Timestamp to execute logic against
+   * @param time   Timestamp to execute logic against
    * @return boolean - whether or not the given condition is true or not
    */
   public abstract boolean test(Person person, long time);
 
   /**
-   * Find the most recent entry, of a specific type of HealthRecord.Entry
-   * within the patient history. May return null.
-   * @param person Person the logic is executing against
+   * Find the most recent entry, of a specific type of HealthRecord.Entry within
+   * the patient history. May return null.
+   * 
+   * @param person    Person the logic is executing against
    * @param classType Must be a HealthRecord.Entry or subclass.
-   * @param code The code being searched for.
+   * @param code      The code being searched for.
    * @return The HealthRecord.Entry (or subclass) that was found.
    */
   @SuppressWarnings("unchecked")
-  private static <T extends HealthRecord.Entry> HealthRecord.Entry findEntryFromHistory(
-      Person person, Class<T> classType, Code code) {
+  private static <T extends HealthRecord.Entry> HealthRecord.Entry findEntryFromHistory(Person person,
+      Class<T> classType, Code code) {
     // Find the most recent health record entry from the patient history
     HealthRecord.Entry entry = null;
     for (State state : person.history) {
@@ -78,8 +80,8 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * The Age condition type tests the patient's age, in a given unit.
-   * (Ex, years for adults or months for young children)
+   * The Age condition type tests the patient's age, in a given unit. (Ex, years
+   * for adults or months for young children)
    */
   public static class Age extends Logic {
     private Double quantity;
@@ -99,8 +101,7 @@ public abstract class Logic implements Serializable {
           break;
         default:
           // TODO - add more unit types if we determine they are necessary
-          throw new UnsupportedOperationException("Units '" + unit
-            + "' not currently supported in Age logic.");
+          throw new UnsupportedOperationException("Units '" + unit + "' not currently supported in Age logic.");
       }
 
       return Utilities.compare(age, quantity, operator);
@@ -108,10 +109,10 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * The Date condition type tests the current year, month, or date being simulated.
-   * For example, this may be used to drive different logic depending on the suggested
-   * medications or procedures of different time periods, or model different frequency
-   * of conditions.
+   * The Date condition type tests the current year, month, or date being
+   * simulated. For example, this may be used to drive different logic depending
+   * on the suggested medications or procedures of different time periods, or
+   * model different frequency of conditions.
    */
   public static class Date extends Logic {
     private Integer year;
@@ -131,7 +132,7 @@ public abstract class Logic implements Serializable {
       } else if (date != null) {
         Calendar testDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         testDate.set(date.year, date.month - 1, date.day, date.hour, date.minute, date.second);
-        testDate.set(Calendar.MILLISECOND,date.millisecond);
+        testDate.set(Calendar.MILLISECOND, date.millisecond);
         long testTime = testDate.getTimeInMillis();
         return Utilities.compare(time, testTime, operator);
       } else if (attribute != null) {
@@ -140,16 +141,15 @@ public abstract class Logic implements Serializable {
         long testTime = dateTime.toInstant().toEpochMilli();
         return Utilities.compare(time, testTime, operator);
       } else {
-        throw new UnsupportedOperationException("Date type "
-            + "not currently supported in Date logic.");
+        throw new UnsupportedOperationException("Date type " + "not currently supported in Date logic.");
       }
     }
   }
 
   /**
-   * The Socioeconomic Status condition type tests the patient's socioeconomic status. Socioeconomic
-   * status is based on income, education, and occupation, and is categorized in Synthea as "High",
-   * "Middle", or "Low".
+   * The Socioeconomic Status condition type tests the patient's socioeconomic
+   * status. Socioeconomic status is based on income, education, and occupation,
+   * and is categorized in Synthea as "High", "Middle", or "Low".
    */
   public static class SocioeconomicStatus extends Logic {
     private String category;
@@ -161,8 +161,9 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * The Race condition type tests a patient's race. Synthea supports the following races:
-   * "White", "Native" (Native American), "Hispanic", "Black", "Asian", and "Other".
+   * The Race condition type tests a patient's race. Synthea supports the
+   * following races: "White", "Native" (Native American), "Hispanic", "Black",
+   * "Asian", and "Other".
    */
   public static class Race extends Logic {
     private String race;
@@ -174,9 +175,10 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * The Symptom condition type tests a patient's current symptoms. Synthea tracks symptoms in order
-   * to drive a patient's encounters, on a scale of 1-100. A symptom may be tracked for multiple
-   * conditions, in these cases only the highest value is considered. See also the Symptom State.
+   * The Symptom condition type tests a patient's current symptoms. Synthea tracks
+   * symptoms in order to drive a patient's encounters, on a scale of 1-100. A
+   * symptom may be tracked for multiple conditions, in these cases only the
+   * highest value is considered. See also the Symptom State.
    */
   public static class Symptom extends Logic {
     private String symptom;
@@ -190,14 +192,14 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * The Observation condition type tests the most recent observation of a given type against a
-   * given value.
-   * Implementation Warnings:
-   * - Synthea does not support conversion between arbitrary units, so all observations of a given
-   *   type are expected to be made in the same units.
-   * - The given observation must have been recorded prior to performing this logical check,
-   *   unless the operator is is nil or is not nil. Otherwise, the GMF will raise an exception
-   *   that the observation value cannot be compared as there has been no observation made.
+   * The Observation condition type tests the most recent observation of a given
+   * type against a given value. Implementation Warnings: - Synthea does not
+   * support conversion between arbitrary units, so all observations of a given
+   * type are expected to be made in the same units. - The given observation must
+   * have been recorded prior to performing this logical check, unless the
+   * operator is is nil or is not nil. Otherwise, the GMF will raise an exception
+   * that the observation value cannot be compared as there has been no
+   * observation made.
    */
   public static class Observation extends Logic {
     private String operator;
@@ -228,8 +230,7 @@ public abstract class Logic implements Serializable {
           if (last == null && person.hasMultipleRecords) {
             // If the latest observation is not in the covered/uncovered health record,
             // then look in the module history.
-            last = (HealthRecord.Observation)
-                findEntryFromHistory(person, HealthRecord.Observation.class, code);
+            last = (HealthRecord.Observation) findEntryFromHistory(person, HealthRecord.Observation.class, code);
             if (Config.getAsBoolean("exporter.split_records.duplicate_data", false)) {
               person.record.currentEncounter(time).observations.add(last);
             }
@@ -241,8 +242,7 @@ public abstract class Logic implements Serializable {
         }
       } else if (this.referencedByAttribute != null) {
         if (person.attributes.containsKey(this.referencedByAttribute)) {
-          observation =
-              (HealthRecord.Observation) person.attributes.get(this.referencedByAttribute);
+          observation = (HealthRecord.Observation) person.attributes.get(this.referencedByAttribute);
         } else {
           return false;
         }
@@ -258,8 +258,7 @@ public abstract class Logic implements Serializable {
         if (this.codes != null) {
           throw new NullPointerException("Required observation " + this.codes + " is null.");
         } else if (this.referencedByAttribute != null) {
-          throw new NullPointerException("Required observation \""
-              + this.referencedByAttribute + "\" is null.");
+          throw new NullPointerException("Required observation \"" + this.referencedByAttribute + "\" is null.");
         } else {
           throw new NullPointerException("Required observation is null.");
         }
@@ -291,17 +290,17 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * GroupedCondition is the parent class for Logic that aggregates multiple conditions.
-   * It should never be used directly in a JSON file.
+   * GroupedCondition is the parent class for Logic that aggregates multiple
+   * conditions. It should never be used directly in a JSON file.
    */
   private abstract static class GroupedCondition extends Logic {
     protected Collection<Logic> conditions;
   }
 
   /**
-   * The And condition type tests that a set of sub-conditions are all true.
-   * If all sub-conditions are true, it will return true,
-   * but if any are false, it will return false.
+   * The And condition type tests that a set of sub-conditions are all true. If
+   * all sub-conditions are true, it will return true, but if any are false, it
+   * will return false.
    */
   public static class And extends GroupedCondition {
     @Override
@@ -312,8 +311,8 @@ public abstract class Logic implements Serializable {
 
   /**
    * The Or condition type tests that at least one of its sub-conditions is true.
-   * If any sub-condition is true, it will return true,
-   * but if all sub-conditions are false, it will return false.
+   * If any sub-condition is true, it will return true, but if all sub-conditions
+   * are false, it will return false.
    */
   public static class Or extends GroupedCondition {
     @Override
@@ -323,9 +322,9 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * The Not condition type negates its sub-condition.
-   * If the sub-condition is true, it will return false;
-   * if the sub-condition is false, it will return true.
+   * The Not condition type negates its sub-condition. If the sub-condition is
+   * true, it will return false; if the sub-condition is false, it will return
+   * true.
    */
   public static class Not extends Logic {
     private Logic condition;
@@ -337,13 +336,12 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * The At Least condition type tests that a minimum number of conditions
-   * from a set of sub-conditions are true.
-   * If the minimum number or more sub-conditions are true, it will return true,
-   * but if less than the minimum are true, it will return false.
-   * (If the minimum is the same as the number of sub-conditions provided,
-   * this is equivalent to the And condition.
-   * If the minimum is 1, this is equivalent to the Or condition.)
+   * The At Least condition type tests that a minimum number of conditions from a
+   * set of sub-conditions are true. If the minimum number or more sub-conditions
+   * are true, it will return true, but if less than the minimum are true, it will
+   * return false. (If the minimum is the same as the number of sub-conditions
+   * provided, this is equivalent to the And condition. If the minimum is 1, this
+   * is equivalent to the Or condition.)
    */
   public static class AtLeast extends GroupedCondition {
     private Integer minimum;
@@ -355,9 +353,10 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * The At Most condition type tests that a maximum number of conditions
-   * from a set of sub-conditions are true. If the maximum number or fewer sub-conditions are true,
-   * it will return true, but if more than the maximum are true, it will return false.
+   * The At Most condition type tests that a maximum number of conditions from a
+   * set of sub-conditions are true. If the maximum number or fewer sub-conditions
+   * are true, it will return true, but if more than the maximum are true, it will
+   * return false.
    */
   public static class AtMost extends GroupedCondition {
     private Integer maximum;
@@ -368,11 +367,9 @@ public abstract class Logic implements Serializable {
     }
   }
 
-
   /**
-   * The True condition always returns true.
-   * This condition is mainly used for testing purposes
-   * and is not expected to be used in any real module.
+   * The True condition always returns true. This condition is mainly used for
+   * testing purposes and is not expected to be used in any real module.
    */
   public static class True extends Logic {
     @Override
@@ -382,9 +379,8 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * The False condition always returns false.
-   * This condition is mainly used for testing purposes
-   * and is not expected to be used in any real module.
+   * The False condition always returns false. This condition is mainly used for
+   * testing purposes and is not expected to be used in any real module.
    */
   public static class False extends Logic {
     @Override
@@ -394,10 +390,10 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * The PriorState condition type tests the progression of the patient through the module, and
-   * checks if a specific state has already been processed (in other words, the state is in the
-   * module's state history). The search for the state may be limited by time or the name of another
-   * state.
+   * The PriorState condition type tests the progression of the patient through
+   * the module, and checks if a specific state has already been processed (in
+   * other words, the state is in the module's state history). The search for the
+   * state may be limited by time or the name of another state.
    */
   public static class PriorState extends Logic {
     private String name;
@@ -422,8 +418,8 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * Parent class for logics that look up "active" things.
-   * This class should never be referenced directly.
+   * Parent class for logics that look up "active" things. This class should never
+   * be referenced directly.
    */
   private abstract static class ActiveLogic extends Logic {
     protected List<Code> codes;
@@ -431,13 +427,13 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * The Active Condition condition type tests whether a given condition is currently diagnosed and
-   * active on the patient.
-   * Future Implementation Considerations:
-   * Currently to check if a condition has been added but not diagnosed, it is possible to use the
-   * PriorState condition to check if the state has been processed. In the future it may be
-   * preferable to add a distinct "Present Condition" logical condition to clearly specify the
-   * intent of looking for a present but not diagnosed condition.
+   * The Active Condition condition type tests whether a given condition is
+   * currently diagnosed and active on the patient. Future Implementation
+   * Considerations: Currently to check if a condition has been added but not
+   * diagnosed, it is possible to use the PriorState condition to check if the
+   * state has been processed. In the future it may be preferable to add a
+   * distinct "Present Condition" logical condition to clearly specify the intent
+   * of looking for a present but not diagnosed condition.
    */
   public static class ActiveCondition extends ActiveLogic {
     @Override
@@ -450,8 +446,8 @@ public abstract class Logic implements Serializable {
           if (person.hasMultipleRecords) {
             // If the condition is not in the current health record,
             // then look in the module history.
-            HealthRecord.Entry condition = (HealthRecord.Entry)
-                findEntryFromHistory(person, HealthRecord.Entry.class, code);
+            HealthRecord.Entry condition = (HealthRecord.Entry) findEntryFromHistory(person, HealthRecord.Entry.class,
+                code);
             if (condition != null && condition.stop == 0L) {
               if (Config.getAsBoolean("exporter.split_records.duplicate_data", false)) {
                 person.record.currentEncounter(time).conditions.add(condition);
@@ -475,8 +471,8 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * The Active Medication condition type tests whether a given medication is currently prescribed
-   * and active for the patient.
+   * The Active Medication condition type tests whether a given medication is
+   * currently prescribed and active for the patient.
    */
   public static class ActiveMedication extends ActiveLogic {
     @Override
@@ -489,8 +485,8 @@ public abstract class Logic implements Serializable {
           if (person.hasMultipleRecords) {
             // If the medication is not in the current health record,
             // then look in the module history.
-            HealthRecord.Medication medication = (HealthRecord.Medication)
-                findEntryFromHistory(person, HealthRecord.Medication.class, code);
+            HealthRecord.Medication medication = (HealthRecord.Medication) findEntryFromHistory(person,
+                HealthRecord.Medication.class, code);
             if (medication != null && medication.stop == 0L) {
               if (Config.getAsBoolean("exporter.split_records.duplicate_data", false)) {
                 person.record.currentEncounter(time).medications.add(medication);
@@ -514,8 +510,8 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * The Active CarePlan condition type tests whether a given care plan is currently prescribed and
-   * active for the patient.
+   * The Active CarePlan condition type tests whether a given care plan is
+   * currently prescribed and active for the patient.
    */
   public static class ActiveCarePlan extends ActiveLogic {
     @Override
@@ -528,8 +524,8 @@ public abstract class Logic implements Serializable {
           if (person.hasMultipleRecords) {
             // If the care plan is not in the current health record,
             // then look in the module history.
-            HealthRecord.CarePlan carePlan = (HealthRecord.CarePlan)
-                findEntryFromHistory(person, HealthRecord.CarePlan.class, code);
+            HealthRecord.CarePlan carePlan = (HealthRecord.CarePlan) findEntryFromHistory(person,
+                HealthRecord.CarePlan.class, code);
             if (carePlan != null && carePlan.stop == 0L) {
               if (Config.getAsBoolean("exporter.split_records.duplicate_data", false)) {
                 person.record.currentEncounter(time).careplans.add(carePlan);
@@ -553,9 +549,9 @@ public abstract class Logic implements Serializable {
   }
 
   /**
-   * The Vital Sign condition type tests a patient's current vital signs. Synthea tracks vital signs
-   * in order to drive a patient's physical condition, and are recorded in observations. See also
-   * the Symptom State.
+   * The Vital Sign condition type tests a patient's current vital signs. Synthea
+   * tracks vital signs in order to drive a patient's physical condition, and are
+   * recorded in observations. See also the Symptom State.
    */
   public static class VitalSign extends Logic {
     private org.mitre.synthea.world.concepts.VitalSign vitalSign;

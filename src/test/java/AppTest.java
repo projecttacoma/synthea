@@ -23,12 +23,13 @@ public class AppTest {
 
   /**
    * Configure settings across these tests.
+   * 
    * @throws Exception on test configuration loading errors.
    */
   @BeforeClass
   public static void testSetup() throws Exception {
     TestHelper.loadTestProperties();
-    TestHelper.generateValuesetTempfiles();
+
     testStateDefault = Config.get("test_state.default", "Massachusetts");
     testTownDefault = Config.get("test_town.default", "Bedford");
     testStateAlternative = Config.get("test_state.alternative", "Utah");
@@ -39,7 +40,7 @@ public class AppTest {
   @Test
   public void testApp() throws Exception {
     TestHelper.exportOff();
-    String[] args = {"-s", "0", "-p", "3", testStateDefault, testTownDefault};
+    String[] args = { "-s", "0", "-p", "3", testStateDefault, testTownDefault };
     final PrintStream original = System.out;
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
     final PrintStream print = new PrintStream(out, true);
@@ -62,7 +63,7 @@ public class AppTest {
   @Test
   public void testAppWithGender() throws Exception {
     TestHelper.exportOff();
-    String[] args = {"-s", "0", "-p", "4", "-g", "M"};
+    String[] args = { "-s", "0", "-p", "4", "-g", "M" };
     final PrintStream original = System.out;
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
     final PrintStream print = new PrintStream(out, true);
@@ -84,7 +85,7 @@ public class AppTest {
   @Test
   public void testAppWithAges() throws Exception {
     TestHelper.exportOff();
-    String[] args = {"-s", "0", "-p", "3", "-a", "30-39"};
+    String[] args = { "-s", "0", "-p", "3", "-a", "30-39" };
     final PrintStream original = System.out;
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
     final PrintStream print = new PrintStream(out, true);
@@ -104,11 +105,10 @@ public class AppTest {
     System.out.println(output);
   }
 
-
   @Test
   public void testAppWithDifferentLocation() throws Exception {
     TestHelper.exportOff();
-    String[] args = {"-s", "0", "-p", "3", testStateAlternative, testTownAlternative};
+    String[] args = { "-s", "0", "-p", "3", testStateAlternative, testTownAlternative };
     final PrintStream original = System.out;
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
     final PrintStream print = new PrintStream(out, true);
@@ -129,7 +129,7 @@ public class AppTest {
   @Test
   public void testAppWithOverflow() throws Exception {
     TestHelper.exportOff();
-    String[] args = {"-s", "0", "-p", "3", "-o", "false"};
+    String[] args = { "-s", "0", "-p", "3", "-o", "false" };
     final PrintStream original = System.out;
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
     final PrintStream print = new PrintStream(out, true);
@@ -143,18 +143,18 @@ public class AppTest {
     Matcher matches = Pattern.compile(regex).matcher(output);
     Assert.assertTrue(matches.find());
     int alive = Integer.parseInt(matches.group(1));
-    int dead = Integer.parseInt(matches.group(2));    
+    int dead = Integer.parseInt(matches.group(2));
     System.setOut(original);
     System.out.println(output);
-    Assert.assertEquals(String.format("Expected 3 total records, got %d alive and %d dead",
-            alive, dead), 3, alive + dead);
+    Assert.assertEquals(String.format("Expected 3 total records, got %d alive and %d dead", alive, dead), 3,
+        alive + dead);
   }
 
   @Test
   public void testAppWithModuleFilter() throws Exception {
     TestHelper.exportOff();
     Config.set("test_key", "pre-test value");
-    String[] args = {"-s", "0", "-p", "0", "-m", "copd" + File.pathSeparator + "allerg*"};
+    String[] args = { "-s", "0", "-p", "0", "-m", "copd" + File.pathSeparator + "allerg*" };
     final PrintStream original = System.out;
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
     final PrintStream print = new PrintStream(out, true);
@@ -177,31 +177,27 @@ public class AppTest {
   public void testAppWithConfigSetting() throws Exception {
     TestHelper.exportOff();
     Config.set("test_key", "pre-test value");
-    String[] args = {"-s", "0", "-p", "0",
-        "--test_key", "changed value", "--exporter.fhir.export=true"};
+    String[] args = { "-s", "0", "-p", "0", "--test_key", "changed value", "--exporter.fhir.export=true" };
     App.main(args);
-    
+
     Assert.assertEquals("changed value", Config.get("test_key"));
     Assert.assertEquals("true", Config.get("exporter.fhir.export"));
   }
-  
-  
+
   @Test
   public void testAppWithLocalConfigFile() throws Exception {
     TestHelper.exportOff();
     Config.set("test.bar", "42");
-    String[] args = {"-s", "0", "-p", "0",
-        "-c", "src/test/resources/test2.properties"};
+    String[] args = { "-s", "0", "-p", "0", "-c", "src/test/resources/test2.properties" };
     App.main(args);
-    
+
     Assert.assertEquals("24", Config.get("test.bar"));
   }
-  
+
   @Test
   public void testAppWithLocalModuleDir() throws Exception {
     TestHelper.exportOff();
-    String[] args = {"-s", "0", "-p", "0",
-        "-d", "src/test/resources/module", "-m", "copd*"};
+    String[] args = { "-s", "0", "-p", "0", "-d", "src/test/resources/module", "-m", "copd*" };
     final PrintStream original = System.out;
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
     final PrintStream print = new PrintStream(out, true);
@@ -217,10 +213,10 @@ public class AppTest {
     System.setOut(original);
     System.out.println(output);
   }
-  
+
   @Test
   public void testInvalidArgs() throws Exception {
-    String[] args = {"-s", "foo", "-p", "foo", testStateDefault, testTownDefault};
+    String[] args = { "-s", "foo", "-p", "foo", testStateDefault, testTownDefault };
     final PrintStream original = System.out;
     final PrintStream originalErr = System.err;
     final ByteArrayOutputStream out = new ByteArrayOutputStream();

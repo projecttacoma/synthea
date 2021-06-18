@@ -52,7 +52,6 @@ import org.mitre.synthea.world.concepts.HealthRecord.Entry;
 import org.mitre.synthea.world.concepts.HealthRecord.Medication;
 import org.mitre.synthea.world.concepts.HealthRecord.Report;
 import org.mitre.synthea.world.concepts.HealthRecord.ValueSet;
-import org.mitre.synthea.world.concepts.Terminology;
 import org.simulator.math.odes.MultiTable;
 
 public abstract class State implements Cloneable, Serializable {
@@ -849,9 +848,7 @@ public abstract class State implements Cloneable, Serializable {
         HealthRecord.Encounter encounter = EncounterModule.createEncounter(person, time, type,
             ClinicianSpecialty.GENERAL_PRACTICE, null);
         entry = encounter;
-        if (this.valueset != null) {
-          encounter.codes.add(Terminology.getRandomCode(this.valueset.url));
-        } else if (codes != null) {
+        if (codes != null) {
           encounter.codes.addAll(codes);
         }
         person.setCurrentEncounter(module, encounter);
@@ -1028,14 +1025,9 @@ public abstract class State implements Cloneable, Serializable {
         // create a temporary coded entry to use for reference in the attribute,
         // which will be replaced if the thing is diagnosed
         HealthRecord.Entry codedEntry;
-        if (this.valueset != null) {
-          Code code = Terminology.getRandomCode(this.valueset.url);
-          codedEntry = person.record.new Entry(time, code.code);
-          codedEntry.codes.add(code);
-        } else {
-          codedEntry = person.record.new Entry(time, codes.get(0).code);
-          codedEntry.codes.addAll(codes);
-        }
+
+        codedEntry = person.record.new Entry(time, codes.get(0).code);
+        codedEntry.codes.addAll(codes);
 
         person.attributes.put(assignToAttribute, codedEntry);
       }
@@ -1069,14 +1061,10 @@ public abstract class State implements Cloneable, Serializable {
 
     @Override
     public void diagnose(Person person, long time) {
-      if (this.valueset != null) {
-        Code primaryCode = Terminology.getRandomCode(this.valueset.url);
-        entry = person.record.conditionStart(time, primaryCode.code);
-        entry.codes.add(primaryCode);
-      } else if (codes != null) {
-        entry = person.record.conditionStart(time, codes.get(0).code);
-        entry.codes.addAll(codes);
-      }
+
+      entry = person.record.conditionStart(time, codes.get(0).code);
+      entry.codes.addAll(codes);
+
       entry.name = this.name;
       entry.additionalAttributes = this.additionalAttributes;
       if (assignToAttribute != null) {
@@ -1146,14 +1134,10 @@ public abstract class State implements Cloneable, Serializable {
   public static class AllergyOnset extends OnsetState {
     @Override
     public void diagnose(Person person, long time) {
-      if (this.valueset != null) {
-        Code primaryCode = Terminology.getRandomCode(this.valueset.url);
-        entry = person.record.allergyStart(time, primaryCode.code);
-        entry.codes.add(primaryCode);
-      } else {
-        entry = person.record.allergyStart(time, codes.get(0).code);
-        entry.codes.addAll(codes);
-      }
+
+      entry = person.record.allergyStart(time, codes.get(0).code);
+      entry.codes.addAll(codes);
+
       entry.name = this.name;
       entry.additionalAttributes = this.additionalAttributes;
 
@@ -1384,14 +1368,8 @@ public abstract class State implements Cloneable, Serializable {
     @Override
     public boolean process(Person person, long time) {
       CarePlan careplan;
-      if (this.valueset != null) {
-        Code primaryCode = Terminology.getRandomCode(this.valueset.url);
-        careplan = person.record.careplanStart(time, primaryCode.code);
-        careplan.codes.add(primaryCode);
-      } else {
-        careplan = person.record.careplanStart(time, codes.get(0).code);
-        careplan.codes.addAll(codes);
-      }
+      careplan = person.record.careplanStart(time, codes.get(0).code);
+      careplan.codes.addAll(codes);
       entry = careplan;
       careplan.name = this.name;
       careplan.additionalAttributes = this.additionalAttributes;
@@ -1508,6 +1486,7 @@ public abstract class State implements Cloneable, Serializable {
     @Override
     public void processOnce(Person person, long time) {
       String primaryCode = codes.get(0).code;
+
       HealthRecord.Procedure procedure = person.record.procedure(time, primaryCode);
       entry = procedure;
       procedure.name = this.name;
@@ -1840,17 +1819,14 @@ public abstract class State implements Cloneable, Serializable {
         o.process(person, time);
       }
       HealthRecord.Observation observation;
-      if (this.valueset != null) {
-        Code primaryCode = Terminology.getRandomCode(this.valueset.url);
-        observation = person.record.multiObservation(time, primaryCode.code, observations.size());
-        observation.codes.add(primaryCode);
-      } else {
-        observation = person.record.multiObservation(time, codes.get(0).code, observations.size());
-        observation.codes.addAll(codes);
-      }
+
+      observation = person.record.multiObservation(time, codes.get(0).code, observations.size());
+      observation.codes.addAll(codes);
+
       entry = observation;
       observation.name = this.name;
       observation.category = category;
+      observation.codes.addAll(codes);
       observation.additionalAttributes = this.additionalAttributes;
 
       return true;
@@ -1872,17 +1848,13 @@ public abstract class State implements Cloneable, Serializable {
         o.process(person, time);
       }
       Report report;
-      if (this.valueset != null) {
-        Code primaryCode = Terminology.getRandomCode(this.valueset.url);
-        report = person.record.report(time, primaryCode.code, observations.size());
-        report.codes.add(primaryCode);
-      } else {
-        report = person.record.report(time, codes.get(0).code, observations.size());
-        report.codes.addAll(codes);
-      }
+
+      report = person.record.report(time, codes.get(0).code, observations.size());
+      report.codes.addAll(codes);
+
       entry = report;
       report.name = this.name;
-      report.additionalAttributes = this.additionalAttributes;
+      report.codes.addAll(codes);
 
       // increment number of labs by respective provider
       Provider provider;
@@ -2204,11 +2176,8 @@ public abstract class State implements Cloneable, Serializable {
     @Override
     public boolean process(Person person, long time) {
       Code reason = null;
-      if (this.valueset != null) {
-        reason = Terminology.getRandomCode(this.valueset.url);
-      } else if (codes != null) {
-        reason = codes.get(0);
-      } else if (conditionOnset != null) {
+      reason = codes.get(0);
+      if (conditionOnset != null) {
         if (person.hadPriorState(conditionOnset)) {
           // loop through the present conditions, the condition "name" will match
           // the name of the ConditionOnset state (aka "reason")

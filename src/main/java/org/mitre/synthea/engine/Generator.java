@@ -50,7 +50,6 @@ import org.mitre.synthea.world.agents.Payer;
 import org.mitre.synthea.world.agents.Person;
 import org.mitre.synthea.world.agents.Provider;
 import org.mitre.synthea.world.concepts.Costs;
-import org.mitre.synthea.world.concepts.Terminology;
 import org.mitre.synthea.world.concepts.VitalSign;
 import org.mitre.synthea.world.geography.Demographics;
 import org.mitre.synthea.world.geography.Location;
@@ -311,17 +310,6 @@ public class Generator implements RandomNumberGenerator {
    */
   private List<String> getModuleNames(List<Module> modules) {
     return modules.stream().map(m -> m.name).collect(Collectors.toList());
-  }
-
-  /**
-   * Extracts a Set of ValueSet URLs from a List of Modules (which gets them from
-   * its embedded States).
-   *
-   * @param modules a collection of Modules
-   * @return a Set of ValueSet URLs
-   */
-  private Set<String> getValueSetUrls(List<Module> modules) {
-    return modules.stream().flatMap(m -> m.getValueSetUrls().stream()).collect(Collectors.toSet());
   }
 
   /**

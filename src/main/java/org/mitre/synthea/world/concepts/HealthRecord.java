@@ -68,6 +68,7 @@ public class HealthRecord implements Serializable {
       this.system = system;
       this.code = code;
       this.display = display;
+      this.valueSet = "";
     }
 
     /**

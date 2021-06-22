@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math.ode.DerivativeException;
+
 import org.mitre.synthea.engine.Components.Attachment;
 import org.mitre.synthea.engine.Components.Exact;
 import org.mitre.synthea.engine.Components.ExactWithUnit;
@@ -132,9 +133,11 @@ public abstract class State implements Cloneable, Serializable {
   public State clone() {
     try {
       State clone = (State) super.clone();
-      clone.entered = null;
-      clone.exited = null;
-      clone.entry = null;
+      clone.module = this.module;
+      clone.name = this.name;
+      clone.transition = this.transition;
+      clone.remarks = this.remarks;
+      clone.additionalAttributes = this.additionalAttributes;
       return clone;
     } catch (CloneNotSupportedException e) {
       // should not happen, and not something we can handle
@@ -1257,14 +1260,10 @@ public abstract class State implements Cloneable, Serializable {
 
       String primaryCode = codes.get(0).code;
       Medication medication = person.record.medicationStart(time, primaryCode, chronic);
-      /*
-       * if (this.valueset != null) { Code primaryCode = codes.get(0); medication =
-       * person.record.medicationStart(time, primaryCode.code, chronic);
-       * medication.codes.add(primaryCode); } else {
-       */
+
       medication = person.record.medicationStart(time, codes.get(0).code, chronic);
       medication.codes.addAll(codes);
-      // }
+
       entry = medication;
       medication.name = this.name;
       medication.additionalAttributes = this.additionalAttributes;

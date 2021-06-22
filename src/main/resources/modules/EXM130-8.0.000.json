@@ -45,7 +45,8 @@
           {
               "system": "http://snomed.info/sct",
               "code": "185465003",
-              "display": "Weekend visit (procedure)"
+              "display": "Weekend visit (procedure)",
+              "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
           }
         ],
         "distributed_transition": [
@@ -72,7 +73,8 @@
           {
             "system": "SNOMED-CT",
             "code": "73761001",
-            "display": "Colonoscopy"
+            "display": "Colonoscopy",
+            "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1020"
           }
         ],
         "direct_transition": "Terminal"

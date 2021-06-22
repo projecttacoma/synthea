@@ -44,7 +44,9 @@
           {
               "system": "http://snomed.info/sct",
               "code": "185465003",
-              "display": "Weekend visit (procedure)"
+              "display": "Weekend visit (procedure)",
+              "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+
           }
         ],
         "distributed_transition": [
@@ -71,7 +73,8 @@
           {
             "system": "LOINC",
             "code": "24605-8",
-            "display": "MG Breast Diagnostic"
+            "display": "MG Breast Diagnostic",
+            "value_set": "https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html"
           }
         ],
         "observations": [
@@ -82,7 +85,8 @@
               {
                 "system": "LOINC",
                 "code": "2339-0",
-                "display": "Glucose"
+                "display": "Glucose",
+                "value_set:":  "https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html"
               }
             ],
             "unit": "mg/dL"

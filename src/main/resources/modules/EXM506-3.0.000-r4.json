@@ -27,7 +27,8 @@
         {
           "system": "SNOMED-CT",
           "code": 32485007,
-          "display": "Hospital admission (procedure)"
+          "display": "Hospital admission (procedure)",
+          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
         }
       ],
       "direct_transition": "Order_Med",
@@ -44,7 +45,8 @@
         {
           "system": "RxNorm",
           "code": 1010600,
-          "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Oral Strip"
+          "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Oral Strip",
+          "value_set":"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1125.2"
         }
       ],
       "direct_transition": "Med_Delay",
@@ -96,7 +98,9 @@
         {
           "system": "RxNorm",
           "code": 1298088,
-          "display": "Flurazepam Hydrochloride 15 MG Oral Capsule"
+          "display": "Flurazepam Hydrochloride 15 MG Oral Capsule",
+          "value_set": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1125.1"
+          
         }
       ],
       "direct_transition": "Med_Delay",

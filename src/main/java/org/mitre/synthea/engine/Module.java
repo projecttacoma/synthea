@@ -50,28 +50,29 @@ import org.mitre.synthea.world.agents.Person;
 /**
  * Module represents the entry point of a generic module.
  * 
- * <p>The `modules` map is the static list of generic modules. It is loaded once per process, 
- * and the list of modules is shared between the generated population. Because we share modules 
- * across the population, it is important that States are cloned before they are executed. 
- * This keeps the "master" copy of the module clean.
+ * <p>
+ * The `modules` map is the static list of generic modules. It is loaded once
+ * per process, and the list of modules is shared between the generated
+ * population. Because we share modules across the population, it is important
+ * that States are cloned before they are executed. This keeps the "master" copy
+ * of the module clean.
  */
 public class Module implements Cloneable, Serializable {
 
   public static final Double GMF_VERSION = 2.0;
 
-  private static final Configuration JSON_PATH_CONFIG = Configuration.builder()
-      .jsonProvider(new GsonJsonProvider())
-      .mappingProvider(new GsonMappingProvider())
-      .build();
+  private static final Configuration JSON_PATH_CONFIG = Configuration.builder().jsonProvider(new GsonJsonProvider())
+      .mappingProvider(new GsonMappingProvider()).build();
 
   private static final Map<String, ModuleSupplier> modules = loadModules();
-  
+
   private static Map<String, ModuleSupplier> loadModules() {
     Map<String, ModuleSupplier> retVal = new ConcurrentHashMap<>();
     int submoduleCount = 0;
 
     retVal.put("Lifecycle", new ModuleSupplier(new LifecycleModule()));
-    //retVal.put("Health Insurance", new ModuleSupplier(new HealthInsuranceModule()));
+    // retVal.put("Health Insurance", new ModuleSupplier(new
+    // HealthInsuranceModule()));
     retVal.put("Cardiovascular Disease", new ModuleSupplier(new CardiovascularDiseaseModule()));
     retVal.put("Quality Of Life", new ModuleSupplier(new QualityOfLifeModule()));
     retVal.put("Weight Loss", new ModuleSupplier(new WeightLossModule()));
@@ -87,9 +88,7 @@ public class Module implements Cloneable, Serializable {
       e.printStackTrace();
     }
 
-    System.out.format("Scanned %d modules and %d submodules.\n", 
-                      retVal.size() - submoduleCount, 
-                      submoduleCount);
+    System.out.format("Scanned %d modules and %d submodules.\n", retVal.size() - submoduleCount, submoduleCount);
 
     return retVal;
   }
@@ -109,12 +108,8 @@ public class Module implements Cloneable, Serializable {
     return overrides;
   }
 
-  private static int walkModuleTree(
-          Path modulesPath,
-          Map<String, ModuleSupplier> retVal, 
-          Properties overrides,
-          boolean localFiles)
-          throws Exception {
+  private static int walkModuleTree(Path modulesPath, Map<String, ModuleSupplier> retVal, Properties overrides,
+      boolean localFiles) throws Exception {
     AtomicInteger submoduleCount = new AtomicInteger();
     Path basePath = modulesPath.getParent();
     Utilities.walkAllModules(modulesPath, t -> {
@@ -124,18 +119,18 @@ public class Module implements Cloneable, Serializable {
         submoduleCount.getAndIncrement();
       }
       Path loadPath = localFiles ? t : basePath.relativize(t);
-      retVal.put(relativePath, new ModuleSupplier(submodule,
-          relativePath,
-          () -> loadFile(loadPath, submodule, overrides, localFiles)));
+      retVal.put(relativePath,
+          new ModuleSupplier(submodule, relativePath, () -> loadFile(loadPath, submodule, overrides, localFiles)));
     });
     return submoduleCount.get();
   }
 
   /**
-   * Recursively adds a folder or directory of module files to the static list
-   * of modules. This does not need to be executed by the core software. It only
-   * is used when the user wants to add another local module folder or during
-   * unit tests.
+   * Recursively adds a folder or directory of module files to the static list of
+   * modules. This does not need to be executed by the core software. It only is
+   * used when the user wants to add another local module folder or during unit
+   * tests.
+   * 
    * @param dir - the folder or directory to add.
    */
   public static void addModules(File dir) {
@@ -143,22 +138,20 @@ public class Module implements Cloneable, Serializable {
     int originalModuleCount = modules.size();
     Properties moduleOverrides = getModuleOverrides();
     try {
-      submoduleCount = walkModuleTree(dir.toPath().toAbsolutePath(), modules,
-              moduleOverrides, true);
+      submoduleCount = walkModuleTree(dir.toPath().toAbsolutePath(), modules, moduleOverrides, true);
     } catch (Exception e) {
       e.printStackTrace();
     }
 
-    System.out.format("Scanned %d local modules and %d local submodules.\n", 
-                      modules.size() - (originalModuleCount + submoduleCount), 
-                      submoduleCount);
+    System.out.format("Scanned %d local modules and %d local submodules.\n",
+        modules.size() - (originalModuleCount + submoduleCount), submoduleCount);
   }
 
   private static void fixPathFromJar(URI uri) throws IOException {
     // this function is a hack to enable reading modules from within a JAR file
     // see https://stackoverflow.com/a/48298758
     if ("jar".equals(uri.getScheme())) {
-      for (FileSystemProvider provider: FileSystemProvider.installedProviders()) {
+      for (FileSystemProvider provider : FileSystemProvider.installedProviders()) {
         if (provider.getScheme().equalsIgnoreCase("jar")) {
           try {
             provider.getFileSystem(uri);
@@ -172,26 +165,26 @@ public class Module implements Cloneable, Serializable {
   }
 
   private static String relativePath(Path filePath, Path modulesFolder) {
-    String relativeFilePath = modulesFolder.relativize(filePath).toString()
-        .replaceFirst(".json", "").replace("\\", "/");
+    String relativeFilePath = modulesFolder.relativize(filePath).toString().replaceFirst(".json", "").replace("\\",
+        "/");
     return relativeFilePath;
   }
 
   /**
    * Loads the module defined from the file at the given path.
    *
-   * @param path Path to the module file
-   * @param submodule whether or not this module is a submodule
-   * @param overrides module overrides to apply
-   * @param localFiles true if the file is external to the src/main/resources folder
+   * @param path       Path to the module file
+   * @param submodule  whether or not this module is a submodule
+   * @param overrides  module overrides to apply
+   * @param localFiles true if the file is external to the src/main/resources
+   *                   folder
    * @return the loaded Module
    */
-  public static Module loadFile(Path path, boolean submodule, Properties overrides,
-          boolean localFiles) throws Exception {
+  public static Module loadFile(Path path, boolean submodule, Properties overrides, boolean localFiles)
+      throws Exception {
     System.out.format("Loading %s %s\n", submodule ? "submodule" : "module", path.toString());
-    String jsonString = localFiles
-            ? new String(Files.readAllBytes(path), StandardCharsets.UTF_8)
-            : Utilities.readResource(path.toString());
+    String jsonString = localFiles ? new String(Files.readAllBytes(path), StandardCharsets.UTF_8)
+        : Utilities.readResource(path.toString());
     if (overrides != null) {
       jsonString = applyOverrides(jsonString, overrides, path.getFileName().toString());
     }
@@ -199,16 +192,15 @@ public class Module implements Cloneable, Serializable {
     return new Module(object, submodule);
   }
 
-  private static String applyOverrides(String jsonString, Properties overrides,
-          String moduleFileName) {
+  private static String applyOverrides(String jsonString, Properties overrides, String moduleFileName) {
     DocumentContext ctx = JsonPath.using(JSON_PATH_CONFIG).parse(jsonString);
     overrides.forEach((key, value) -> {
       // use :: for the separator because filenames cannot contain :
-      String[] parts = ((String)key).split("::");
+      String[] parts = ((String) key).split("::");
       String module = parts[0];
       if (module.equals(moduleFileName)) {
         String jsonPath = parts[1];
-        Double numberValue = Double.parseDouble((String)value);
+        Double numberValue = Double.parseDouble((String) value);
         ctx.set(jsonPath, numberValue);
       }
     });
@@ -216,12 +208,14 @@ public class Module implements Cloneable, Serializable {
   }
 
   public static String[] getModuleNames() {
-    // This will include all known module names, which may be more than are actually loaded.
+    // This will include all known module names, which may be more than are actually
+    // loaded.
     return modules.keySet().toArray(new String[modules.size()]);
   }
 
   /**
    * Get the top-level modules.
+   * 
    * @return a list of top-level modules. Submodules are not included.
    */
   public static List<Module> getModules() {
@@ -230,8 +224,10 @@ public class Module implements Cloneable, Serializable {
 
   /**
    * Get a list of top-level modules including core and submodules.
-   * @return a list of top-level modules, only including core modules and those allowed by the 
-   *     supplied predicate. Submodules are loaded, but not included.
+   * 
+   * @return a list of top-level modules, only including core modules and those
+   *         allowed by the supplied predicate. Submodules are loaded, but not
+   *         included.
    */
   public static List<Module> getModules(Predicate<String> pathPredicate) {
     List<Module> list = new ArrayList<Module>();
@@ -247,9 +243,10 @@ public class Module implements Cloneable, Serializable {
 
   /**
    * Get a module by path.
-   * @param path
-   *          : the relative path of the module, without the root or ".json" file extension. For
-   *          example, "medications/otc_antihistamine" or "appendicitis".
+   * 
+   * @param path : the relative path of the module, without the root or ".json"
+   *             file extension. For example, "medications/otc_antihistamine" or
+   *             "appendicitis".
    * @return module : the given module
    */
   public static Module getModuleByPath(String path) {
@@ -269,8 +266,9 @@ public class Module implements Cloneable, Serializable {
 
   /**
    * Create a new Module.
+   * 
    * @param definition JSON definition of the module.
-   * @param submodule Whether or not this is a shared or reusable submodule.
+   * @param submodule  Whether or not this is a shared or reusable submodule.
    * @throws Exception when an error occurs inflating the module.
    */
   public Module(JsonObject definition, boolean submodule) throws Exception {
@@ -279,9 +277,9 @@ public class Module implements Cloneable, Serializable {
     if (definition.has("gmf_version")) {
       this.gmfVersion = definition.get("gmf_version").getAsDouble();
       if (this.gmfVersion > GMF_VERSION) {
-        throw new IllegalStateException(String.format("%s specifies GMF version %f in JSON, "
-            + "which is beyond the known GMF version of %f",
-            this.name, this.gmfVersion, GMF_VERSION));
+        throw new IllegalStateException(
+            String.format("%s specifies GMF version %f in JSON, " + "which is beyond the known GMF version of %f",
+                this.name, this.gmfVersion, GMF_VERSION));
       }
     }
 
@@ -320,28 +318,24 @@ public class Module implements Cloneable, Serializable {
   }
 
   /**
-   * Process this Module with the given Person at the specified time within the simulation.
-   * Processing will complete if the person dies.
+   * Process this Module with the given Person at the specified time within the
+   * simulation. Processing will complete if the person dies.
    * 
-   * @param person
-   *          : the person being simulated
-   * @param time
-   *          : the date within the simulated world
+   * @param person : the person being simulated
+   * @param time   : the date within the simulated world
    * @return completed : whether or not this Module completed.
    */
   public boolean process(Person person, long time) {
     return process(person, time, true);
   }
-  
+
   /**
-   * Process this Module with the given Person at the specified time within the simulation.
+   * Process this Module with the given Person at the specified time within the
+   * simulation.
    * 
-   * @param person
-   *          : the person being simulated
-   * @param time
-   *          : the date within the simulated world
-   * @param terminateOnDeath
-   *          : whether or not to terminate if the patient is dead
+   * @param person           : the person being simulated
+   * @param time             : the date within the simulated world
+   * @param terminateOnDeath : whether or not to terminate if the patient is dead
    * @return completed : whether or not this Module completed.
    */
   @SuppressWarnings("unchecked")
@@ -368,7 +362,7 @@ public class Module implements Cloneable, Serializable {
     // probably more than one state
     String nextStateName = null;
     while (current.run(person, time, terminateOnDeath)) {
-      Long exited = current.exited;      
+      Long exited = current.exited;
       nextStateName = current.transition(person, time);
       // System.out.println(" Transitioning to " + nextStateName);
       current = states.get(nextStateName).clone(); // clone the state so we don't dirty the original
@@ -378,7 +372,8 @@ public class Module implements Cloneable, Serializable {
         if (terminateOnDeath && !person.alive(exited)) {
           return true;
         }
-        // This must be a delay state that expired between cycles, so temporarily rewind time
+        // This must be a delay state that expired between cycles, so temporarily rewind
+        // time
         if (process(person, exited, terminateOnDeath)) {
           // if the patient died during the delay, stop
           if (terminateOnDeath) {
@@ -398,6 +393,7 @@ public class Module implements Cloneable, Serializable {
 
   /**
    * Get a state by name.
+   * 
    * @param name - case-sensitive state name.
    * @return State if it exists, otherwise null.
    */
@@ -423,15 +419,12 @@ public class Module implements Cloneable, Serializable {
    *
    * @return Set with all the unique valueset URLs
    */
-  public Set<String> getValueSetUrls() {
-    if (states != null) {
-      return states.values().stream()
-        .filter(s -> s.valueset != null)
-        .map(s -> s.valueset.url)
-        .collect(Collectors.toSet());
-    }
-    return new HashSet<String>();
-  }
+  /*
+   * public Set<String> getValueSetUrls() { if (states != null) { return
+   * states.values().stream() .filter(s -> s.valueset != null) .map(s ->
+   * s.valueset.url) .collect(Collectors.toSet()); } return new HashSet<String>();
+   * }
+   */
 
   /**
    * ModuleSupplier allows for lazy loading of Modules.
@@ -449,9 +442,10 @@ public class Module implements Cloneable, Serializable {
 
     /**
      * Create a ModuleSupplier.
+     * 
      * @param submodule Whether or not this is a reusable or shared submodule.
-     * @param path The file path of the module being supplied.
-     * @param loader The loader that will lazily supply the module on demand.
+     * @param path      The file path of the module being supplied.
+     * @param loader    The loader that will lazily supply the module on demand.
      */
     public ModuleSupplier(boolean submodule, String path, Callable<Module> loader) {
       this.core = false;
@@ -464,6 +458,7 @@ public class Module implements Cloneable, Serializable {
 
     /**
      * Constructs a Module supplier around a singleton Module instance.
+     * 
      * @param module The singleton Module instance.
      */
     public ModuleSupplier(Module module) {

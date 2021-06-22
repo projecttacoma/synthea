@@ -33,35 +33,31 @@ import org.mitre.synthea.world.concepts.HealthRecord.Observation;
 import org.mitre.synthea.world.concepts.HealthRecord.Report;
 
 public abstract class Exporter {
-  
+
   /**
    * Supported FHIR versions.
    */
   public enum SupportedFhirVersion {
-    DSTU2,
-    STU3,
-    R4
+    DSTU2, STU3, R4
   }
-  
-  private static final List<Pair<Person, Long>> deferredExports = 
-          Collections.synchronizedList(new LinkedList<>());
+
+  private static final List<Pair<Person, Long>> deferredExports = Collections.synchronizedList(new LinkedList<>());
 
   /**
    * Runtime configuration of the record exporter.
    */
   public static class ExporterRuntimeOptions {
-    
+
     public int yearsOfHistory;
     public boolean deferExports = false;
-    public boolean terminologyService =
-        !Config.get("generate.terminology_service_url", "").isEmpty();
+    public boolean terminologyService = !Config.get("generate.terminology_service_url", "").isEmpty();
     private BlockingQueue<String> recordQueue;
     private SupportedFhirVersion fhirVersion;
-    
+
     public ExporterRuntimeOptions() {
       yearsOfHistory = Integer.parseInt(Config.get("exporter.years_of_history"));
     }
-    
+
     /**
      * Copy constructor.
      */
@@ -72,28 +68,30 @@ public abstract class Exporter {
       recordQueue = init.recordQueue;
       fhirVersion = init.fhirVersion;
     }
-    
+
     /**
      * Enables a blocking queue to which FHIR patient records will be written.
-     * @param version specifies the version of FHIR that will be written to the queue.
+     * 
+     * @param version specifies the version of FHIR that will be written to the
+     *                queue.
      */
     public void enableQueue(SupportedFhirVersion version) {
       recordQueue = new LinkedBlockingQueue<>(1);
       fhirVersion = version;
     }
-    
+
     public SupportedFhirVersion queuedFhirVersion() {
       return fhirVersion;
     }
-    
+
     public boolean isQueueEnabled() {
       return recordQueue != null;
     }
 
     /**
-     * Returns the newest generated patient record 
-     * or blocks until next record becomes available.
-     * Returns null if the generator does not have a record queue.
+     * Returns the newest generated patient record or blocks until next record
+     * becomes available. Returns null if the generator does not have a record
+     * queue.
      */
     public String getNextRecord() throws InterruptedException {
       if (recordQueue == null) {
@@ -109,14 +107,14 @@ public abstract class Exporter {
       return recordQueue == null || recordQueue.size() == 0;
     }
   }
-  
+
   /**
-   * Export a single patient, into all the formats supported. (Formats may be enabled or disabled by
-   * configuration)
+   * Export a single patient, into all the formats supported. (Formats may be
+   * enabled or disabled by configuration)
    *
    * @param person   Patient to export
    * @param stopTime Time at which the simulation stopped
-   * @param options Runtime exporter options
+   * @param options  Runtime exporter options
    */
   public static void export(Person person, long stopTime, ExporterRuntimeOptions options) {
     if (options.deferExports) {
@@ -133,7 +131,8 @@ public abstract class Exporter {
         int i = 0;
         for (String key : person.records.keySet()) {
           person.record = person.records.get(key);
-          // If the person fixed Records, overwrite their attributes from the fixed records.
+          // If the person fixed Records, overwrite their attributes from the fixed
+          // records.
           if (person.attributes.get(Person.RECORD_GROUP) != null) {
             FixedRecordGroup rg = (FixedRecordGroup) person.attributes.get(Person.RECORD_GROUP);
             int recordToPull = i;
@@ -151,10 +150,11 @@ public abstract class Exporter {
       }
     }
   }
-  
+
   /**
-   * Export a single patient, into all the formats supported. (Formats may be enabled or disabled by
-   * configuration). This method variant is only currently used by test classes.
+   * Export a single patient, into all the formats supported. (Formats may be
+   * enabled or disabled by configuration). This method variant is only currently
+   * used by test classes.
    *
    * @param person   Patient to export
    * @param stopTime Time at which the simulation stopped
@@ -164,21 +164,15 @@ public abstract class Exporter {
   }
 
   /**
-   * Export a single patient record, into all the formats supported.
-   * (Formats may be enabled or disabled by configuration)
+   * Export a single patient record, into all the formats supported. (Formats may
+   * be enabled or disabled by configuration)
    *
    * @param person   Patient to export, with Patient.record being set.
    * @param fileTag  An identifier to tag the file with.
    * @param stopTime Time at which the simulation stopped
-   * @param options Generator's record queue (may be null)
+   * @param options  Generator's record queue (may be null)
    */
-  private static void exportRecord(Person person, String fileTag, long stopTime,
-          ExporterRuntimeOptions options) {
-    if (options.terminologyService) {
-      // Resolve any coded values within the record that are specified using a ValueSet URI.
-      ValueSetCodeResolver valueSetCodeResolver = new ValueSetCodeResolver(person);
-      valueSetCodeResolver.resolve();
-    }
+  private static void exportRecord(Person person, String fileTag, long stopTime, ExporterRuntimeOptions options) {
 
     if (Config.getAsBoolean("exporter.fhir_stu3.export")) {
       File outDirectory = getOutputFolder("fhir_stu3", person);
@@ -316,7 +310,8 @@ public abstract class Exporter {
 
   /**
    * Write a new file with the given contents.
-   * @param file Path to the new file.
+   * 
+   * @param file     Path to the new file.
    * @param contents The contents of the file.
    */
   private static void writeNewFile(Path file, String contents) {
@@ -329,7 +324,8 @@ public abstract class Exporter {
 
   /**
    * Append contents to the end of a file.
-   * @param file Path to the new file.
+   * 
+   * @param file     Path to the new file.
    * @param contents The contents of the file.
    */
   private static synchronized void appendToFile(Path file, String contents) {
@@ -349,32 +345,32 @@ public abstract class Exporter {
   }
 
   /**
-   * Run any exporters that require the full dataset to be generated prior to exporting.
-   * (E.g., an aggregate statistical exporter)
+   * Run any exporters that require the full dataset to be generated prior to
+   * exporting. (E.g., an aggregate statistical exporter)
    *
    * @param generator Generator that generated the patients
    */
   public static void runPostCompletionExports(Generator generator) {
     runPostCompletionExports(generator, new ExporterRuntimeOptions());
   }
-  
+
   /**
-   * Run any exporters that require the full dataset to be generated prior to exporting.
-   * (E.g., an aggregate statistical exporter)
+   * Run any exporters that require the full dataset to be generated prior to
+   * exporting. (E.g., an aggregate statistical exporter)
    *
    * @param generator Generator that generated the patients
    */
   public static void runPostCompletionExports(Generator generator, ExporterRuntimeOptions options) {
-    
+
     if (options.deferExports) {
       ExporterRuntimeOptions nonDeferredOptions = new ExporterRuntimeOptions(options);
       nonDeferredOptions.deferExports = false;
-      for (Pair<Person, Long> entry: deferredExports) {
+      for (Pair<Person, Long> entry : deferredExports) {
         export(entry.getLeft(), entry.getRight(), nonDeferredOptions);
       }
       deferredExports.clear();
     }
-    
+
     String bulk = Config.get("exporter.fhir.bulk_data");
 
     // Before we force bulk data to be off...
@@ -437,10 +433,10 @@ public abstract class Exporter {
   }
 
   /**
-   * Filter the patient's history to only the last __ years
-   * but also include relevant history from before that. Exclude
-   * any history that occurs after the specified end_time -- typically
-   * this is the current time/System.currentTimeMillis().
+   * Filter the patient's history to only the last __ years but also include
+   * relevant history from before that. Exclude any history that occurs after the
+   * specified end_time -- typically this is the current
+   * time/System.currentTimeMillis().
    *
    * @param original    The Person to filter.
    * @param yearsToKeep The last __ years to keep.
@@ -450,8 +446,8 @@ public abstract class Exporter {
   public static Person filterForExport(Person original, int yearsToKeep, long endTime) {
     // TODO: clone the patient so that we export only the last _ years
     // but the rest still exists, just in case
-    Person filtered = original; //.clone();
-    //filtered.record = original.record.clone();
+    Person filtered = original; // .clone();
+    // filtered.record = original.record.clone();
 
     if (filtered.hasMultipleRecords) {
       for (String key : filtered.records.keySet()) {
@@ -466,12 +462,11 @@ public abstract class Exporter {
   }
 
   /**
-   * Filter the health record to only the last __ years
-   * but also include relevant history from before that. Exclude
-   * any history that occurs after the specified end_time -- typically
-   * this is the current time/System.currentTimeMillis().
+   * Filter the health record to only the last __ years but also include relevant
+   * history from before that. Exclude any history that occurs after the specified
+   * end_time -- typically this is the current time/System.currentTimeMillis().
    *
-   * @param record    The record to filter.
+   * @param record      The record to filter.
    * @param yearsToKeep The last __ years to keep.
    * @param endTime     The time the history ends.
    * @return Modified record with history expunged.
@@ -493,9 +488,9 @@ public abstract class Exporter {
       // allergies are essentially the same as conditions
       filterEntries(encounter.allergies, claimItems, cutoffDate, endTime, keepCondition);
 
-      // some of the "future death" logic could potentially add a future-dated death certificate
-      Predicate<Observation> isCauseOfDeath =
-          o -> DeathModule.CAUSE_OF_DEATH_CODE.code.equals(o.type);
+      // some of the "future death" logic could potentially add a future-dated death
+      // certificate
+      Predicate<Observation> isCauseOfDeath = o -> DeathModule.CAUSE_OF_DEATH_CODE.code.equals(o.type);
       // keep cause of death unless it's future dated
       Predicate<Observation> keepObservation = isCauseOfDeath.and(notFutureDated);
       filterEntries(encounter.observations, claimItems, cutoffDate, endTime, keepObservation);
@@ -508,27 +503,22 @@ public abstract class Exporter {
       filterEntries(encounter.procedures, claimItems, cutoffDate, endTime, null);
 
       // keep medications if still active, regardless of start date
-      filterEntries(encounter.medications, claimItems, cutoffDate, endTime,
-          med -> record.medicationActive(med.type));
+      filterEntries(encounter.medications, claimItems, cutoffDate, endTime, med -> record.medicationActive(med.type));
 
       filterEntries(encounter.immunizations, claimItems, cutoffDate, endTime, null);
 
       // keep careplans if they are still active, regardless of start date
-      filterEntries(encounter.careplans, claimItems, cutoffDate, endTime,
-          cp -> record.careplanActive(cp.type));
+      filterEntries(encounter.careplans, claimItems, cutoffDate, endTime, cp -> record.careplanActive(cp.type));
     }
 
     // if ANY of these are not empty, the encounter is not empty
-    Predicate<Encounter> encounterNotEmpty = e ->
-        !e.conditions.isEmpty() || !e.allergies.isEmpty()
-            || !e.observations.isEmpty() || !e.reports.isEmpty()
-            || !e.procedures.isEmpty() || !e.medications.isEmpty()
-            || !e.immunizations.isEmpty() || !e.careplans.isEmpty();
+    Predicate<Encounter> encounterNotEmpty = e -> !e.conditions.isEmpty() || !e.allergies.isEmpty()
+        || !e.observations.isEmpty() || !e.reports.isEmpty() || !e.procedures.isEmpty() || !e.medications.isEmpty()
+        || !e.immunizations.isEmpty() || !e.careplans.isEmpty();
 
-    Predicate<Encounter> isDeathCertification =
-        e -> !e.codes.isEmpty() && DeathModule.DEATH_CERTIFICATION.equals(e.codes.get(0));
-    Predicate<Encounter> keepEncounter =
-        encounterNotEmpty.or(isDeathCertification.and(notFutureDated));
+    Predicate<Encounter> isDeathCertification = e -> !e.codes.isEmpty()
+        && DeathModule.DEATH_CERTIFICATION.equals(e.codes.get(0));
+    Predicate<Encounter> keepEncounter = encounterNotEmpty.or(isDeathCertification.and(notFutureDated));
 
     // finally filter out any empty encounters
     filterEntries(record.encounters, Collections.emptyList(), cutoffDate, endTime, keepEncounter);
@@ -537,20 +527,20 @@ public abstract class Exporter {
   }
 
   /**
-   * Helper function to filter entries from a list. Entries are kept if their date range falls
-   * within the provided range or if `keepFunction` is provided, and returns `true` for the given
-   * entry.
+   * Helper function to filter entries from a list. Entries are kept if their date
+   * range falls within the provided range or if `keepFunction` is provided, and
+   * returns `true` for the given entry.
    *
    * @param entries      List of `Entry`s to filter
-   * @param claimItems   List of ClaimItems, from which any removed items should also be removed.
+   * @param claimItems   List of ClaimItems, from which any removed items should
+   *                     also be removed.
    * @param cutoffDate   Minimum date, entries older than this may be discarded
    * @param endTime      Maximum date, entries newer than this may be discarded
-   * @param keepFunction Keep function, if this function returns `true` for an entry then it will
-   *                     be kept
+   * @param keepFunction Keep function, if this function returns `true` for an
+   *                     entry then it will be kept
    */
-  private static <E extends HealthRecord.Entry> void filterEntries(List<E> entries,
-      List<HealthRecord.Entry> claimItems, long cutoffDate,
-      long endTime, Predicate<E> keepFunction) {
+  private static <E extends HealthRecord.Entry> void filterEntries(List<E> entries, List<HealthRecord.Entry> claimItems,
+      long cutoffDate, long endTime, Predicate<E> keepFunction) {
 
     Iterator<E> iterator = entries.iterator();
     // iterator allows us to use the remove() method
@@ -559,8 +549,7 @@ public abstract class Exporter {
       // if the entry is not within the keep time range,
       // and the special keep function (if provided) doesn't say keep it
       // remove it from the list
-      if (!entryWithinTimeRange(entry, cutoffDate, endTime)
-          && (keepFunction == null || !keepFunction.test(entry))) {
+      if (!entryWithinTimeRange(entry, cutoffDate, endTime) && (keepFunction == null || !keepFunction.test(entry))) {
         iterator.remove();
 
         claimItems.removeIf(ci -> ci == entry);
@@ -569,14 +558,14 @@ public abstract class Exporter {
     }
   }
 
-  private static boolean entryWithinTimeRange(
-      HealthRecord.Entry e, long cutoffDate, long endTime) {
+  private static boolean entryWithinTimeRange(HealthRecord.Entry e, long cutoffDate, long endTime) {
 
     if (e.start > cutoffDate && e.start <= endTime) {
       return true; // trivial case, when we're within the last __ years
     }
 
-    // if the entry has a stop time, check if the effective date range overlapped the last __ years
+    // if the entry has a stop time, check if the effective date range overlapped
+    // the last __ years
     if (e.stop != 0L && e.stop > cutoffDate) {
 
       if (e.stop > endTime) {
@@ -592,10 +581,10 @@ public abstract class Exporter {
   }
 
   /**
-   * There is a tiny chance that in the last time step, one module ran to the very end of
-   * the time step, and the next killed the person half-way through. In this case,
-   * it is possible that an encounter (from the first module) occurred post death.
-   * We must filter it out here.
+   * There is a tiny chance that in the last time step, one module ran to the very
+   * end of the time step, and the next killed the person half-way through. In
+   * this case, it is possible that an encounter (from the first module) occurred
+   * post death. We must filter it out here.
    *
    * @param person The dead person.
    */
@@ -606,8 +595,7 @@ public abstract class Exporter {
         Iterator<Encounter> iter = record.encounters.iterator();
         while (iter.hasNext()) {
           Encounter encounter = iter.next();
-          if (encounter.start > deathTime
-              && !encounter.codes.contains(DeathModule.DEATH_CERTIFICATION)) {
+          if (encounter.start > deathTime && !encounter.codes.contains(DeathModule.DEATH_CERTIFICATION)) {
             iter.remove();
           }
         }
@@ -616,8 +604,7 @@ public abstract class Exporter {
       Iterator<Encounter> iter = person.record.encounters.iterator();
       while (iter.hasNext()) {
         Encounter encounter = iter.next();
-        if (encounter.start > deathTime
-            && !encounter.codes.contains(DeathModule.DEATH_CERTIFICATION)) {
+        if (encounter.start > deathTime && !encounter.codes.contains(DeathModule.DEATH_CERTIFICATION)) {
           iter.remove();
         }
       }
@@ -625,22 +612,21 @@ public abstract class Exporter {
   }
 
   /**
-   * Get the folder where the patient record should be stored.
-   * See the configuration settings "exporter.subfolders_by_id_substring" and
+   * Get the folder where the patient record should be stored. See the
+   * configuration settings "exporter.subfolders_by_id_substring" and
    * "exporter.baseDirectory".
    *
    * @param folderName The base folder to use.
    * @param person     The person being exported.
-   * @return Either the base folder provided, or a subdirectory, depending on configuration
-   *     settings.
+   * @return Either the base folder provided, or a subdirectory, depending on
+   *         configuration settings.
    */
   public static File getOutputFolder(String folderName, Person person) {
     List<String> folders = new ArrayList<>();
 
     folders.add(folderName);
 
-    if (person != null
-        && Config.getAsBoolean("exporter.subfolders_by_id_substring")) {
+    if (person != null && Config.getAsBoolean("exporter.subfolders_by_id_substring")) {
       String id = (String) person.attributes.get(Person.ID);
 
       folders.add(id.substring(0, 2));
@@ -656,8 +642,8 @@ public abstract class Exporter {
   }
 
   /**
-   * Get the filename to used to export the patient record.
-   * See the configuration setting "exporter.use_uuid_filenames".
+   * Get the filename to used to export the patient record. See the configuration
+   * setting "exporter.use_uuid_filenames".
    *
    * @param person    The person being exported.
    * @param tag       A tag to add to the filename before the extension.
@@ -669,8 +655,8 @@ public abstract class Exporter {
       return person.attributes.get(Person.ID) + tag + "." + extension;
     } else {
       // ensure unique filenames for now
-      return person.attributes.get(Person.NAME).toString().replace(' ', '_') + "_"
-          + person.attributes.get(Person.ID) + tag + "." + extension;
+      return person.attributes.get(Person.NAME).toString().replace(' ', '_') + "_" + person.attributes.get(Person.ID)
+          + tag + "." + extension;
     }
   }
 }

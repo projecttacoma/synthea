@@ -28,3 +28,19 @@ src/main/resources/version.txt
 
 src/main/resources/map.json
 
+src/main/resources/terminology/valuesets-EXM105-8.2.000-bundle.json
+src/main/resources/terminology/valuesets-EXM104-8.2.000-bundle.json
+src/main/resources/terminology/valuesets-EXM111-9.1.000-bundle.json
+src/main/resources/terminology/valuesets-EXM124-8.2.000-bundle.json
+src/main/resources/terminology/valuesets-EXM124-9.0.000-bundle.json
+src/main/resources/terminology/valuesets-EXM108-8.3.000-bundle.json
+src/main/resources/terminology/valuesets-EXM130-7.3.000-bundle.json
+src/main/resources/terminology/valuesets-EXM149-9.2.000-bundle.json
+src/main/resources/terminology/valuesets-EXM153-9.2.000-bundle.json
+src/main/resources/terminology/valuesets-EXM125-7.3.000-bundle.json
+src/main/resources/terminology/valuesets-EXM347-4.3.000-bundle.json
+src/main/resources/terminology/valuesets-EXM347-3.2.000-bundle.json
+src/main/resources/terminology/valuesets-EXM506-2.2.000-bundle.json
+src/main/resources/terminology/valuesets-EXM529-1.0.000-bundle.json
+src/main/resources/terminology/valuesets-EXM74-10.2.000-bundle.json
+src/main/resources/terminology/valuesets-EXM349-2.10.000-bundle.json

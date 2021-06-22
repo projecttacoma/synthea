@@ -51,8 +51,8 @@ import org.mitre.synthea.world.concepts.HealthRecord.EncounterType;
 import org.mitre.synthea.world.concepts.HealthRecord.Entry;
 import org.mitre.synthea.world.concepts.HealthRecord.Medication;
 import org.mitre.synthea.world.concepts.HealthRecord.Report;
-import org.mitre.synthea.world.concepts.HealthRecord.ValueSet;
 import org.simulator.math.odes.MultiTable;
+//import org.mitre.synthea.world.concepts.HealthRecord.ValueSet;
 
 public abstract class State implements Cloneable, Serializable {
   public Module module;
@@ -72,7 +72,8 @@ public abstract class State implements Cloneable, Serializable {
 
   public static boolean ENABLE_PHYSIOLOGY_STATE = Config.getAsBoolean("physiology.state.enabled", false);
 
-  public ValueSet valueset; // This is included at the top level for ease of computation
+  // public ValueSet valueset; // This is included at the top level for ease of
+  // computation
   public JsonObject additionalAttributes;
 
   protected void initialize(Module module, String name, JsonObject definition) {
@@ -1021,7 +1022,7 @@ public abstract class State implements Cloneable, Serializable {
       if (targetEncounter == null || targetEncounter.trim().length() == 0
           || (encounter != null && targetEncounter.equals(encounter.name))) {
         diagnose(person, time);
-      } else if (assignToAttribute != null && (codes != null || this.valueset != null)) {
+      } else if (assignToAttribute != null && (codes != null)) {
         // create a temporary coded entry to use for reference in the attribute,
         // which will be replaced if the thing is diagnosed
         HealthRecord.Entry codedEntry;
@@ -1253,15 +1254,17 @@ public abstract class State implements Cloneable, Serializable {
 
     @Override
     public boolean process(Person person, long time) {
-      Medication medication;
-      if (this.valueset != null) {
-        Code primaryCode = codes.get(0);
-        medication = person.record.medicationStart(time, primaryCode.code, chronic);
-        medication.codes.add(primaryCode);
-      } else {
-        medication = person.record.medicationStart(time, codes.get(0).code, chronic);
-        medication.codes.addAll(codes);
-      }
+
+      String primaryCode = codes.get(0).code;
+      Medication medication = person.record.medicationStart(time, primaryCode, chronic);
+      /*
+       * if (this.valueset != null) { Code primaryCode = codes.get(0); medication =
+       * person.record.medicationStart(time, primaryCode.code, chronic);
+       * medication.codes.add(primaryCode); } else {
+       */
+      medication = person.record.medicationStart(time, codes.get(0).code, chronic);
+      medication.codes.addAll(codes);
+      // }
       entry = medication;
       medication.name = this.name;
       medication.additionalAttributes = this.additionalAttributes;

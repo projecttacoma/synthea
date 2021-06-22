@@ -2953,7 +2953,7 @@ public class FhirR4 {
       for (Map.Entry<String, JsonElement> e : json.getAsJsonObject().entrySet()) {
         if (e.getValue().isJsonPrimitive() && e.getValue().getAsJsonPrimitive().isString()) {
           String str = e.getValue().getAsString();
-          Matcher m = org.mitre.synthea.export.UUID_PATTERN.matcher(str);
+          Matcher m = UUID_PATTERN.matcher(str);
           while (m.find()) {
             String match = m.group(0);
             createOrUseUUID(match, uuids);

@@ -3,7 +3,6 @@
 .project
 .settings
 .gradle
-/nbproject/**
 /build/**
 bin/**
 
@@ -11,17 +10,9 @@ bin/**
 /bin/
 
 /output/
-/out/
 
 # don't commit the autobuilt version file
 src/main/resources/version.txt
-
-# don't commit the code maps
-src/main/resources/map.json
-src/main/resources/condition_code_map.json
-src/main/resources/medication_code_map.json
-src/main/resources/drg_code_map.json
-src/main/resources/dme_code_map.json
 
 # H2 database files
 **/*.mv.db
@@ -31,7 +22,7 @@ src/main/resources/dme_code_map.json
 .vscode/launch.test.json
 .vscode/launch.json
 .vscode/settings.json
-/build/
 
-# VS Code plugin files
-.history
+# eCQM ValueSets
+src/main/resources/terminology/*
+!src/main/resources/terminology/.gitkeep

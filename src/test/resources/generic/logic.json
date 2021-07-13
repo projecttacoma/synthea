@@ -129,6 +129,21 @@
       "millisecond": 0
     }
   },
+  "afterDateAttributeTest" : {
+    "condition_type" : "Date",
+    "operator" : ">=",
+    "attribute": "ecqm.measurementPeriodStart"
+  },
+  "beforeDateAttributeTest" : {
+    "condition_type" : "Date",
+    "operator" : "<=",
+    "attribute": "ecqm.measurementPeriodStart"
+  },
+  "isDateAttributeTest" : {
+    "condition_type" : "Date",
+    "operator" : "==",
+    "attribute": "ecqm.measurementPeriodStart"
+  },
   "attributeEqualTo_TestValue_Test" : {
     "condition_type" : "Attribute",
     "attribute" : "Test_Attribute_Key",

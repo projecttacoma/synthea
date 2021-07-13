@@ -62,7 +62,7 @@ public class HealthRecord implements Serializable {
      *
      * @param system  the URI identifier of the code system
      * @param code    the code itself
-     * @param display human-readable description of the coe
+     * @param display human-readable description of the code
      */
     public Code(String system, String code, String display) {
       this.system = system;
@@ -115,6 +115,57 @@ public class HealthRecord implements Serializable {
   }
 
   /**
+   * HealthRecord.ValueSet represents a valueset URL and display name.
+   */
+  public static class ValueSet implements Comparable<ValueSet> {
+    /** The ValueSet URL. */
+    public String url;
+    /** The human-readable description of the ValueSet. */
+    public String display;
+
+    /**
+     * Create a new ValueSet.
+     *
+     * @param url     the valueset URL
+     * @param display human-readable description of the code
+     */
+    public ValueSet(String url, String display) {
+      this.url = url;
+      this.display = display;
+    }
+
+    /**
+     * Create a new ValueSet from JSON.
+     *
+     * @param definition JSON object that contains 'url', and 'display'
+     *                   attributes.
+     */
+    public ValueSet(JsonObject definition) {
+      this.url = definition.get("url").getAsString();
+      this.display = definition.get("display").getAsString();
+    }
+
+    public boolean equals(ValueSet other) {
+      return this.url.equals(other.url);
+    }
+
+    public String toString() {
+      return String.format("%s %s", url, display);
+    }
+
+    public static ValueSet fromJson(JsonObject jsonValueSet) {
+      ValueSet vs = new ValueSet(jsonValueSet);
+      return vs;
+    }
+
+    @Override
+    public int compareTo(ValueSet other) {
+      int compare = this.url.compareTo(other.url);
+      return compare;
+    }
+  }
+
+  /**
    * All things within a HealthRecord are instances of Entry. For example,
    * Observations, Reports, Medications, etc. All Entries have a name, start and
    * stop times, a type, and a list of associated codes.
@@ -128,6 +179,7 @@ public class HealthRecord implements Serializable {
     public long stop;
     public String type;
     public List<Code> codes;
+    public JsonObject additionalAttributes;
     private BigDecimal cost;
 
     /**

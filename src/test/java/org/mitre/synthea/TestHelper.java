@@ -5,7 +5,11 @@ import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -28,6 +32,7 @@ public abstract class TestHelper {
 
   /**
    * Returns a test fixture Module by filename.
+   *
    * @param filename The filename of the test fixture Module.
    * @return A Module.
    * @throws Exception On errors.
@@ -40,6 +45,7 @@ public abstract class TestHelper {
 
   /**
    * Load the test.properties file.
+   *
    * @throws Exception on configuration loading errors.
    */
   public static void loadTestProperties() throws Exception {
@@ -47,15 +53,15 @@ public abstract class TestHelper {
     File file = new File(uri);
     Config.load(file);
   }
-  
+
   public static WireMockConfiguration wiremockOptions() {
     return WireMockConfiguration.options().port(5566);
   }
-  
+
   /**
-   * Check whether the <code>synthea.test.httpRecording</code> property is set to enable HTTP 
+   * Check whether the <code>synthea.test.httpRecording</code> property is set to enable HTTP
    * recording, for tests with HTTP mocking.
-   * 
+   *
    * @return true if HTTP recording is enabled
    */
   public static boolean isHttpRecordingEnabled() {
@@ -65,7 +71,7 @@ public abstract class TestHelper {
 
   /**
    * Return the configured URL for recording terminology HTTP responses.
-   * 
+   *
    * @return the configured terminology service URL
    */
   public static String getTxRecordingSource() {
@@ -78,7 +84,7 @@ public abstract class TestHelper {
 
   /**
    * Returns a WireMock response builder representing a response from a FHIR server.
-   * 
+   *
    * @return a ResponseDefinitionBuilder object
    */
   public static ResponseDefinitionBuilder fhirResponse() {

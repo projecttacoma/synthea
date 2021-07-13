@@ -1,0 +1,13 @@
+{
+    "priority": {
+        "coding": [
+            {
+                "system": "http://snomed.info/sct",
+                "code": "260385009",
+                "display": "Negative",
+                "userSelected": "this is supposed to be a boolean"
+            }
+        ],
+        "text": "THIS IS A TEST VALUE FOR PRIORITY"
+    }
+}

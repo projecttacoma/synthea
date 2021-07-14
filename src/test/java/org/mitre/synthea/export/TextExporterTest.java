@@ -15,19 +15,20 @@ import org.mitre.synthea.world.agents.Person;
 
 public class TextExporterTest {
   /**
-   * Temporary folder for any exported files, guaranteed to be deleted at the end of the test.
+   * Temporary folder for any exported files, guaranteed to be deleted at the end
+   * of the test.
    */
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
-  
+
   @Test
   public void testTextExport() throws Exception {
     TestHelper.loadTestProperties();
-    TestHelper.generateValuesetTempfiles();
+   // TestHelper.generateValuesetTempfiles();
     Generator.DEFAULT_STATE = Config.get("test_state.default", "Massachusetts");
     File tempOutputFolder = tempFolder.newFolder();
     Config.set("exporter.baseDirectory", tempOutputFolder.toString());
-    
+
     int numberOfPeople = 10;
     Generator generator = new Generator(numberOfPeople);
     generator.options.overflow = false;
@@ -40,21 +41,21 @@ public class TextExporterTest {
     }
 
     // if we get here we at least had no exceptions
-    
+
     File expectedExportFolder = tempOutputFolder.toPath().resolve("text").toFile();
-    
+
     assertTrue(expectedExportFolder.exists() && expectedExportFolder.isDirectory());
-    
+
     int count = 0;
     for (File txtFile : expectedExportFolder.listFiles()) {
       if (!txtFile.getName().endsWith(".txt")) {
         continue;
       }
-      
+
       count++;
     }
-    
-    assertEquals("Expected " + numberOfPeople + " files in the output directory, found " + count, 
-        numberOfPeople, count);
+
+    assertEquals("Expected " + numberOfPeople + " files in the output directory, found " + count, numberOfPeople,
+        count);
   }
 }

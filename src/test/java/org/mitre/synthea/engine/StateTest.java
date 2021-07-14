@@ -12,6 +12,7 @@ import static org.mockito.Mockito.withSettings;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;

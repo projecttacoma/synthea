@@ -71,8 +71,7 @@ public abstract class State implements Cloneable, Serializable {
   private List<LookupTableTransitionOption> lookupTableTransition;
   public List<String> remarks;
 
-  public static boolean ENABLE_PHYSIOLOGY_STATE =
-      Config.getAsBoolean("physiology.state.enabled", false);
+  public static boolean ENABLE_PHYSIOLOGY_STATE = Config.getAsBoolean("physiology.state.enabled", false);
 
   public ValueSet valueset; // This is included at the top level for ease of computation
   public JsonObject additionalAttributes;
@@ -99,16 +98,13 @@ public abstract class State implements Cloneable, Serializable {
   /**
    * Construct a state object from the given definitions.
    *
-   * @param module
-   *          The module this state belongs to
-   * @param name
-   *          The name of the state
-   * @param definition
-   *          The JSON definition of the state
-   * @return The constructed State object. The returned object will be of the appropriate subclass
-   *         of State, based on the "type" parameter in the JSON definition.
-   * @throws Exception
-   *           if the state type does not exist
+   * @param module     The module this state belongs to
+   * @param name       The name of the state
+   * @param definition The JSON definition of the state
+   * @return The constructed State object. The returned object will be of the
+   *         appropriate subclass of State, based on the "type" parameter in the
+   *         JSON definition.
+   * @throws Exception if the state type does not exist
    */
   public static State build(Module module, String name, JsonObject definition) throws Exception {
     String className = State.class.getName() + "$" + definition.get("type").getAsString();
@@ -124,13 +120,14 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * clone() should copy all the necessary variables of this State so that it can be correctly
-   * executed and modified without altering the original copy. So for example, 'entered' and
-   * 'exited' times should not be copied so the clone can be cleanly executed.
-   * Implementation note: the base Object.clone() copies over all fields automatically
-   * (as a shallow copy), so we don't need to do that ourselves. Instead, we should
-   * 1. explicitly null out any fields that should not be copied, such as entered/exited
-   * 2. deep copy mutable reference types, if necessary.
+   * clone() should copy all the necessary variables of this State so that it can
+   * be correctly executed and modified without altering the original copy. So for
+   * example, 'entered' and 'exited' times should not be copied so the clone can
+   * be cleanly executed. Implementation note: the base Object.clone() copies over
+   * all fields automatically (as a shallow copy), so we don't need to do that
+   * ourselves. Instead, we should 1. explicitly null out any fields that should
+   * not be copied, such as entered/exited 2. deep copy mutable reference types,
+   * if necessary.
    */
   public State clone() {
     try {
@@ -154,32 +151,29 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * Process this State with the given Person at the specified time within the simulation.
-   * If this State generates a HealthRecord.Entry during processing, then the resulting data
-   * will reside in the State.entry field.
+   * Process this State with the given Person at the specified time within the
+   * simulation. If this State generates a HealthRecord.Entry during processing,
+   * then the resulting data will reside in the State.entry field.
    *
-   * @param person
-   *          : the person being simulated
-   * @param time
-   *          : the date within the simulated world
-   * @return `true` if processing should continue to the next state, `false` if the processing
-   *         should halt for this time step.
+   * @param person : the person being simulated
+   * @param time   : the date within the simulated world
+   * @return `true` if processing should continue to the next state, `false` if
+   *         the processing should halt for this time step.
    */
   public abstract boolean process(Person person, long time);
 
   /**
-   * Run the state. This processes the state, setting entered and exit times.
-   * This will terminate immediately if the patient is dead and `terminateOnDeath` is true.
+   * Run the state. This processes the state, setting entered and exit times. This
+   * will terminate immediately if the patient is dead and `terminateOnDeath` is
+   * true.
    *
-   * @param person
-   *          the person being simulated
-   * @param time
-   *          the date within the simulated world
-   * @param terminateOnDeath
-   *          whether to terminate immediately and not process the state if the patient is dead
-   *          (has no effect on patients that are alive)
-   * @return `true` if processing should continue to the next state, `false` if the processing
-   *         should halt for this time step.
+   * @param person           the person being simulated
+   * @param time             the date within the simulated world
+   * @param terminateOnDeath whether to terminate immediately and not process the
+   *                         state if the patient is dead (has no effect on
+   *                         patients that are alive)
+   * @return `true` if processing should continue to the next state, `false` if
+   *         the processing should halt for this time step.
    */
   public boolean run(Person person, long time, boolean terminateOnDeath) {
     if (terminateOnDeath && !person.alive(time)) {
@@ -194,9 +188,9 @@ public abstract class State implements Cloneable, Serializable {
       // Delayable states return a special value for exited,
       // to indicate when the state actually completed.
       if (this instanceof Delayable) {
-        this.exited = ((Delayable)this).next;
+        this.exited = ((Delayable) this).next;
       } else if (this instanceof CallSubmodule) {
-        this.exited = ((CallSubmodule)this).submoduleExited;
+        this.exited = ((CallSubmodule) this).submoduleExited;
       } else {
         this.exited = time;
       }
@@ -212,10 +206,11 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The Initial state type is the first state that is processed in a generic module. It does not
-   * provide any specific function except to indicate the starting point, so it has no properties
-   * except its type. The Initial state requires the specific name "Initial". In addition, it is the
-   * only state for which there can only be one in the whole module.
+   * The Initial state type is the first state that is processed in a generic
+   * module. It does not provide any specific function except to indicate the
+   * starting point, so it has no properties except its type. The Initial state
+   * requires the specific name "Initial". In addition, it is the only state for
+   * which there can only be one in the whole module.
    */
   public static class Initial extends State {
     @Override
@@ -225,10 +220,10 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The Simple state type indicates a state that performs no additional actions, adds no additional
-   * information to the patient entity, and just transitions to the next state. As an example, this
-   * state may be used to chain conditional or distributed transitions, in order to represent
-   * complex logic.
+   * The Simple state type indicates a state that performs no additional actions,
+   * adds no additional information to the patient entity, and just transitions to
+   * the next state. As an example, this state may be used to chain conditional or
+   * distributed transitions, in order to represent complex logic.
    */
   public static class Simple extends State {
     @Override
@@ -238,10 +233,10 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The CallSubmodule state immediately processes a reusable series of states contained in a
-   * submodule. These states are processes in the same time step, starting with the submodule's
-   * Initial state. Once the submodule's Terminal state is reached, execution of the calling module
-   * resumes.
+   * The CallSubmodule state immediately processes a reusable series of states
+   * contained in a submodule. These states are processes in the same time step,
+   * starting with the submodule's Initial state. Once the submodule's Terminal
+   * state is reached, execution of the calling module resumes.
    */
   public static class CallSubmodule extends State {
     private String submodule;
@@ -306,12 +301,12 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The Physiology state executes a physiology simulation according to the provided
-   * configuration options. Expressions can be used to map Patient attributes /
-   * VitalSigns to model parameters, and vice versa, or they can be mapped directly.
-   * This is an alternative way to get simulation results applicable for a specific
-   * module. If a simulation is intended to provide VitalSign values, a physiology
-   * value generator should be used instead.
+   * The Physiology state executes a physiology simulation according to the
+   * provided configuration options. Expressions can be used to map Patient
+   * attributes / VitalSigns to model parameters, and vice versa, or they can be
+   * mapped directly. This is an alternative way to get simulation results
+   * applicable for a specific module. If a simulation is intended to provide
+   * VitalSign values, a physiology value generator should be used instead.
    */
   public static class Physiology extends State {
     private String model;
@@ -324,7 +319,7 @@ public abstract class State implements Cloneable, Serializable {
     private List<IoMapper> outputs;
     private Transition altTransition;
     private transient PhysiologySimulator simulator;
-    private transient Map<String,String> paramTypes;
+    private transient Map<String, String> paramTypes;
 
     @Override
     protected void initialize(Module module, String name, JsonObject definition) {
@@ -338,8 +333,7 @@ public abstract class State implements Cloneable, Serializable {
       this.altTransition = new DirectTransition(altDirectTransition);
 
       if (leadTime > simDuration) {
-        throw new IllegalArgumentException(
-            "Simulation lead time cannot be greater than sim duration!");
+        throw new IllegalArgumentException("Simulation lead time cannot be greater than sim duration!");
       }
 
       if (ENABLE_PHYSIOLOGY_STATE) {
@@ -352,9 +346,11 @@ public abstract class State implements Cloneable, Serializable {
       paramTypes = new HashMap<String, String>();
 
       for (String param : simulator.getParameters()) {
-        // Assume all physiology model inputs are lists of Decimal objects which is typically
+        // Assume all physiology model inputs are lists of Decimal objects which is
+        // typically
         // the case
-        // TODO: Look into whether SBML supports other parameter types, and if so, how we might map
+        // TODO: Look into whether SBML supports other parameter types, and if so, how
+        // we might map
         // those types to CQL types
         paramTypes.put(param, "List<Decimal>");
       }
@@ -394,7 +390,7 @@ public abstract class State implements Cloneable, Serializable {
       if (!ENABLE_PHYSIOLOGY_STATE) {
         return true;
       }
-      Map<String,Double> modelInputs = new HashMap<String,Double>();
+      Map<String, Double> modelInputs = new HashMap<String, Double>();
       for (IoMapper mapper : inputs) {
         mapper.toModelInputs(person, time, modelInputs);
       }
@@ -404,19 +400,16 @@ public abstract class State implements Cloneable, Serializable {
           switch (mapper.getType()) {
             default:
             case ATTRIBUTE:
-              person.attributes.put(mapper.getTo(),
-                  mapper.getOutputResult(results, leadTime));
+              person.attributes.put(mapper.getTo(), mapper.getOutputResult(results, leadTime));
               break;
             case VITAL_SIGN:
-              throw new IllegalArgumentException(
-                    "Mapping to VitalSigns is unsupported in the Physiology State. "
-                    + "Define a physiology generator instead for \"" + mapper.getTo() + "\".");
+              throw new IllegalArgumentException("Mapping to VitalSigns is unsupported in the Physiology State. "
+                  + "Define a physiology generator instead for \"" + mapper.getTo() + "\".");
           }
         }
       } catch (DerivativeException ex) {
-        Logger.getLogger(State.class.getName()).log(Level.SEVERE, "Unable to solve simulation \""
-            + model + "\" at time step " + time + " for person "
-            + person.attributes.get(Person.ID), ex);
+        Logger.getLogger(State.class.getName()).log(Level.SEVERE, "Unable to solve simulation \"" + model
+            + "\" at time step " + time + " for person " + person.attributes.get(Person.ID), ex);
       }
       return true;
     }
@@ -425,10 +418,8 @@ public abstract class State implements Cloneable, Serializable {
      * Directs to the normal transition if Physiology states are enabled. Otherwise
      * directs to the alternative direct transition.
      *
-     * @param person
-     *          the person being simulated
-     * @param time
-     *          the date within the simulated world
+     * @param person the person being simulated
+     * @param time   the date within the simulated world
      * @return next state
      */
     public String transition(Person person, long time) {
@@ -442,10 +433,11 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The Terminal state type indicates the end of the module progression. Once a Terminal state is
-   * reached, no further progress will be made. As such, Terminal states cannot have any transition
-   * properties. If desired, there may be multiple Terminal states with different names to indicate
-   * different ending points; however, this has no actual effect on the records that are produced.
+   * The Terminal state type indicates the end of the module progression. Once a
+   * Terminal state is reached, no further progress will be made. As such,
+   * Terminal states cannot have any transition properties. If desired, there may
+   * be multiple Terminal states with different names to indicate different ending
+   * points; however, this has no actual effect on the records that are produced.
    */
   public static class Terminal extends State {
     @Override
@@ -470,14 +462,13 @@ public abstract class State implements Cloneable, Serializable {
     public abstract long endOfDelay(long time, Person person);
 
     /**
-     * Process any aspect of this state which should only happen once.
-     * Because of the nature of Delay states, this state may get called
-     * multiple times: once per timestep while delaying. To ensure
-     * any actions which are supposed to happen only happen once,
-     * this function should be overriden in subclasses.
+     * Process any aspect of this state which should only happen once. Because of
+     * the nature of Delay states, this state may get called multiple times: once
+     * per timestep while delaying. To ensure any actions which are supposed to
+     * happen only happen once, this function should be overriden in subclasses.
      *
      * @param person the person being simulated
-     * @param time the date within the simulated world
+     * @param time   the date within the simulated world
      */
     public void processOnce(Person person, long time) {
       // do nothing. allow subclasses to override
@@ -511,8 +502,9 @@ public abstract class State implements Cloneable, Serializable {
     }
 
     /**
-     * Based on attributes provided in JSON, determine whether this state was defined with legacy
-     * GMF (Version 1.0).
+     * Based on attributes provided in JSON, determine whether this state was
+     * defined with legacy GMF (Version 1.0).
+     * 
      * @return True if the state was defined with legacy GMF
      */
     public boolean isLegacyGmf() {
@@ -524,19 +516,22 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The Delay state type introduces a pre-configured temporal delay in the module's timeline. As a
-   * simple example, a Delay state may indicate a one-month gap in time between an initial encounter
-   * and a followup encounter. The module will not pass through the Delay state until the proper
-   * amount of time has passed. The Delay state may define an exact time to delay (e.g. 4 days) or a
-   * range of time to delay (e.g. 5 - 7 days).
+   * The Delay state type introduces a pre-configured temporal delay in the
+   * module's timeline. As a simple example, a Delay state may indicate a
+   * one-month gap in time between an initial encounter and a followup encounter.
+   * The module will not pass through the Delay state until the proper amount of
+   * time has passed. The Delay state may define an exact time to delay (e.g. 4
+   * days) or a range of time to delay (e.g. 5 - 7 days).
    *
-   * <p>Implementation Details Synthea generation occurs in time steps; the default time step is 7
-   * days. This means that if a module is processed on a given date, the next time it is processed
-   * will be exactly 7 days later. If a delay expiration falls between time steps (e.g. day 3 of a
-   * 7-day time step), then the first time step after the delay expiration will effectively rewind
-   * the clock to the delay expiration time and process states using that time. Once it reaches a
-   * state that it can't pass through, it will process it once more using the original (7-day time
-   * step) time.
+   * <p>
+   * Implementation Details Synthea generation occurs in time steps; the default
+   * time step is 7 days. This means that if a module is processed on a given
+   * date, the next time it is processed will be exactly 7 days later. If a delay
+   * expiration falls between time steps (e.g. day 3 of a 7-day time step), then
+   * the first time step after the delay expiration will effectively rewind the
+   * clock to the delay expiration time and process states using that time. Once
+   * it reaches a state that it can't pass through, it will process it once more
+   * using the original (7-day time step) time.
    */
   public static class Delay extends Delayable {
     // For GMF 1.0 Support
@@ -550,8 +545,7 @@ public abstract class State implements Cloneable, Serializable {
     protected void initialize(Module module, String name, JsonObject definition) {
       super.initialize(module, name, definition);
       if (distribution != null && !distribution.validate()) {
-        throw new IllegalStateException(
-            String.format("State %s contains an invalid distribution", this.name));
+        throw new IllegalStateException(String.format("State %s contains an invalid distribution", this.name));
       }
     }
 
@@ -580,8 +574,9 @@ public abstract class State implements Cloneable, Serializable {
     }
 
     /**
-     * Based on attributes provided in JSON, determine whether this state was defined with legacy
-     * GMF (Version 1.0).
+     * Based on attributes provided in JSON, determine whether this state was
+     * defined with legacy GMF (Version 1.0).
+     * 
      * @return True if the state was defined with legacy GMF
      */
     public boolean isLegacyGmf() {
@@ -593,18 +588,21 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The Guard state type indicates a point in the module through which a patient can only pass if
-   * they meet certain logical conditions. For example, a Guard may block a workflow until the
-   * patient reaches a certain age, after which the Guard allows the module to continue to progress.
-   * Depending on the condition(s), a patient may be blocked by a Guard until they die - in which
+   * The Guard state type indicates a point in the module through which a patient
+   * can only pass if they meet certain logical conditions. For example, a Guard
+   * may block a workflow until the patient reaches a certain age, after which the
+   * Guard allows the module to continue to progress. Depending on the
+   * condition(s), a patient may be blocked by a Guard until they die - in which
    * case they never reach the module's Terminal state.
    *
-   * <p>The Guard state's allow property provides the logical condition(s) which must be met to
-   * allow the module to continue to the next state. Guard states are similar to conditional
-   * transitions in some ways, but also have an important difference. A conditional transition
-   * tests conditions once and uses the result to immediately choose the next state. A Guard
-   * state will test the same condition on every time-step until the condition passes, at which
-   * point it progresses to the next state.
+   * <p>
+   * The Guard state's allow property provides the logical condition(s) which must
+   * be met to allow the module to continue to the next state. Guard states are
+   * similar to conditional transitions in some ways, but also have an important
+   * difference. A conditional transition tests conditions once and uses the
+   * result to immediately choose the next state. A Guard state will test the same
+   * condition on every time-step until the condition passes, at which point it
+   * progresses to the next state.
    */
   public static class Guard extends State {
     private Logic allow;
@@ -626,11 +624,12 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The SetAttribute state type sets a specified attribute on the patient entity. In addition to
-   * the assign_to_attribute property on MedicationOrder/ConditionOnset/etc states, this state
-   * allows for arbitrary text or values to be set on an attribute, or for the attribute to be
-   * reset. This also allows for a synthea configuration item to be pulled in as the value for the
-   * attribute.
+   * The SetAttribute state type sets a specified attribute on the patient entity.
+   * In addition to the assign_to_attribute property on
+   * MedicationOrder/ConditionOnset/etc states, this state allows for arbitrary
+   * text or values to be set on an attribute, or for the attribute to be reset.
+   * This also allows for a synthea configuration item to be pulled in as the
+   * value for the attribute.
    */
   public static class SetAttribute extends State {
     private String attribute;
@@ -644,7 +643,6 @@ public abstract class State implements Cloneable, Serializable {
     private double period;
     // For GMF 2.0 Support
     private Distribution distribution;
-
 
     private ThreadLocal<ExpressionProcessor> getExpProcessor() {
       // If the ThreadLocal instance hasn't been created yet, create it now
@@ -679,8 +677,7 @@ public abstract class State implements Cloneable, Serializable {
       }
 
       if (distribution != null && !distribution.validate()) {
-        throw new IllegalStateException(
-            String.format("State %s contains an invalid distribution", this.name));
+        throw new IllegalStateException(String.format("State %s contains an invalid distribution", this.name));
       }
     }
 
@@ -689,7 +686,7 @@ public abstract class State implements Cloneable, Serializable {
       SetAttribute clone = (SetAttribute) super.clone();
       clone.attribute = attribute;
       clone.value = value;
-      clone.configKey = configKey;
+      // clone.configKey = configKey;
       clone.expression = expression;
       clone.threadExpProcessor = threadExpProcessor;
       return clone;
@@ -710,8 +707,8 @@ public abstract class State implements Cloneable, Serializable {
           try {
             data.addValue(Double.parseDouble(items[i]));
           } catch (NumberFormatException nfe) {
-            throw new RuntimeException("unable to parse \"" + items[i]
-                + "\" in SetAttribute state for \"" + attribute + "\"", nfe);
+            throw new RuntimeException(
+                "unable to parse \"" + items[i] + "\" in SetAttribute state for \"" + attribute + "\"", nfe);
           }
         }
 
@@ -723,13 +720,10 @@ public abstract class State implements Cloneable, Serializable {
       }
 
       // If a configuration key is defined look for a value from config and use it
-      if (configKey != null) {
-        String configValue = Config.get(configKey);
-        if (configValue != null) {
-          value = configValue;
-        }
-      }
-
+      /*
+       * if (configKey != null) { String configValue = Config.get(configKey); if
+       * (configValue != null) { value = configValue; } }
+       */
       if (value != null) {
         person.attributes.put(attribute, value);
       } else if (person.attributes.containsKey(attribute)) {
@@ -742,10 +736,13 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The Counter state type increments or decrements a specified numeric attribute on the patient
-   * entity. In essence, this state counts the number of times it is processed.
+   * The Counter state type increments or decrements a specified numeric attribute
+   * on the patient entity. In essence, this state counts the number of times it
+   * is processed.
    *
-   * <p>Note: The attribute is initialized with a default value of 0 if not previously set.
+   * <p>
+   * Note: The attribute is initialized with a default value of 0 if not
+   * previously set.
    */
   public static class Counter extends State {
     private String attribute;
@@ -789,34 +786,43 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The Encounter state type indicates a point in the module where an encounter should take place.
-   * Encounters are important in Synthea because they are generally the mechanism through which the
-   * actual patient record is updated (a disease is diagnosed, a medication is prescribed, etc). The
-   * generic module framework supports integration with scheduled wellness encounters from Synthea's
-   * Encounters module, as well as creation of new stand-alone encounters.
+   * The Encounter state type indicates a point in the module where an encounter
+   * should take place. Encounters are important in Synthea because they are
+   * generally the mechanism through which the actual patient record is updated (a
+   * disease is diagnosed, a medication is prescribed, etc). The generic module
+   * framework supports integration with scheduled wellness encounters from
+   * Synthea's Encounters module, as well as creation of new stand-alone
+   * encounters.
    *
-   * <p>Scheduled Wellness Encounters vs. Standalone Encounters An Encounter state with the wellness
-   * property set to true will block until the next scheduled wellness encounter occurs. Scheduled
-   * wellness encounters are managed by the Encounters module in Synthea and, depending on the
-   * patient's age, typically occur every 1 - 3 years. When a scheduled wellness encounter finally
-   * does occur, Synthea will search the generic modules for currently blocked Encounter states and
-   * will immediately process them (and their subsequent states). An example where this might be
-   * used is for a condition that onsets between encounters, but isn't found and diagnosed until the
-   * next regularly scheduled wellness encounter.
+   * <p>
+   * Scheduled Wellness Encounters vs. Standalone Encounters An Encounter state
+   * with the wellness property set to true will block until the next scheduled
+   * wellness encounter occurs. Scheduled wellness encounters are managed by the
+   * Encounters module in Synthea and, depending on the patient's age, typically
+   * occur every 1 - 3 years. When a scheduled wellness encounter finally does
+   * occur, Synthea will search the generic modules for currently blocked
+   * Encounter states and will immediately process them (and their subsequent
+   * states). An example where this might be used is for a condition that onsets
+   * between encounters, but isn't found and diagnosed until the next regularly
+   * scheduled wellness encounter.
    *
-   * <p>An Encounter state without the wellness property set will be processed and recorded in the
-   * patient record immediately. Since this creates an encounter, the encounter_class and one or
-   * more codes must be specified in the state configuration. This is how generic modules can
-   * introduce encounters that are not already scheduled by other modules.
+   * <p>
+   * An Encounter state without the wellness property set will be processed and
+   * recorded in the patient record immediately. Since this creates an encounter,
+   * the encounter_class and one or more codes must be specified in the state
+   * configuration. This is how generic modules can introduce encounters that are
+   * not already scheduled by other modules.
    *
-   * <p>Encounters and Related Events Encounters are typically the mechanism through which a
-   * patient's record will be updated. This makes sense since most recorded events (diagnoses,
-   * prescriptions, and procedures) should happen in the context of an encounter. When an Encounter
-   * state is successfully processed, Synthea will look through the previously processed states for
-   * un-recorded ConditionOnset or AllergyOnset instances that indicate that Encounter (by name) as
-   * the target_encounter. If Synthea finds any, they will be recorded in the patient's record at
-   * the time of the encounter. This is the mechanism for onsetting a disease before it is
-   * discovered and diagnosed.
+   * <p>
+   * Encounters and Related Events Encounters are typically the mechanism through
+   * which a patient's record will be updated. This makes sense since most
+   * recorded events (diagnoses, prescriptions, and procedures) should happen in
+   * the context of an encounter. When an Encounter state is successfully
+   * processed, Synthea will look through the previously processed states for
+   * un-recorded ConditionOnset or AllergyOnset instances that indicate that
+   * Encounter (by name) as the target_encounter. If Synthea finds any, they will
+   * be recorded in the patient's record at the time of the encounter. This is the
+   * mechanism for onsetting a disease before it is discovered and diagnosed.
    */
   public static class Encounter extends State {
     private boolean wellness;
@@ -903,14 +909,13 @@ public abstract class State implements Cloneable, Serializable {
 
     private void renewChronicMedicationsAtWellness(Person person, long time) {
       // note that this code has some child codes for various different reasons,
-      // eg "medical aim achieved", "ineffective", "avoid interaction", "side effect", etc
-      Code expiredCode = new Code("SNOMED-CT", "182840001",
-          "Drug treatment stopped - medical advice");
+      // eg "medical aim achieved", "ineffective", "avoid interaction", "side effect",
+      // etc
+      Code expiredCode = new Code("SNOMED-CT", "182840001", "Drug treatment stopped - medical advice");
 
       // We keep track of the meds we renewed to add them to the chronic list later
       // as we can't modify the list of chronic meds while iterating.
-      List<Medication> renewedMedications =
-          new ArrayList<Medication>(person.chronicMedications.values().size());
+      List<Medication> renewedMedications = new ArrayList<Medication>(person.chronicMedications.values().size());
 
       // Go through each chronic medication and "reorder"
       for (Medication chronicMedication : person.chronicMedications.values()) {
@@ -923,8 +928,7 @@ public abstract class State implements Cloneable, Serializable {
         // IMPORTANT: 3rd par is false to prevent modification of chronic meds
         // list as we iterate over it According to the documentation, the
         // results of modifying the array (x remove) are undefined
-        Medication medication = person.record.medicationStart(time, primaryCode,
-            false);
+        Medication medication = person.record.medicationStart(time, primaryCode, false);
 
         // Copy over the characteristics from old medication to new medication
         medication.name = chronicMedication.name;
@@ -965,16 +969,19 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The EncounterEnd state type indicates the end of the encounter the patient is currently in, for
-   * example when the patient leaves a clinician's office, or is discharged from a hospital. The
-   * time the encounter ended is recorded on the patient's record.
+   * The EncounterEnd state type indicates the end of the encounter the patient is
+   * currently in, for example when the patient leaves a clinician's office, or is
+   * discharged from a hospital. The time the encounter ended is recorded on the
+   * patient's record.
    *
-   * <p>Note on Wellness Encounters Because wellness encounters are scheduled and initiated outside
-   * the generic modules, and a single wellness encounter may contain observations or medications
-   * from multiple modules, an EncounterEnd state will not record the end time for a wellness
-   * encounter. Hence it is not strictly necessary to use an EncounterEnd state to end the wellness
-   * encounter. Still, it is recommended to use an EncounterEnd state to mark a clear end to the
-   * encounter.
+   * <p>
+   * Note on Wellness Encounters Because wellness encounters are scheduled and
+   * initiated outside the generic modules, and a single wellness encounter may
+   * contain observations or medications from multiple modules, an EncounterEnd
+   * state will not record the end time for a wellness encounter. Hence it is not
+   * strictly necessary to use an EncounterEnd state to end the wellness
+   * encounter. Still, it is recommended to use an EncounterEnd state to mark a
+   * clear end to the encounter.
    */
   public static class EncounterEnd extends State {
     private Code dischargeDisposition;
@@ -1004,9 +1011,9 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * OnsetState is a parent class for ConditionOnset and AllergyOnset, where some common logic can
-   * be shared. It is an implementation detail and should never be referenced directly in a JSON
-   * module.
+   * OnsetState is a parent class for ConditionOnset and AllergyOnset, where some
+   * common logic can be shared. It is an implementation detail and should never
+   * be referenced directly in a JSON module.
    */
   private abstract static class OnsetState extends State {
     public boolean diagnosed;
@@ -1054,20 +1061,21 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The ConditionOnset state type indicates a point in the module where the patient acquires a
-   * condition. This is not necessarily the same as when the condition is diagnosed and recorded in
-   * the patient's record. In fact, it is possible for a condition to onset but never be discovered.
+   * The ConditionOnset state type indicates a point in the module where the
+   * patient acquires a condition. This is not necessarily the same as when the
+   * condition is diagnosed and recorded in the patient's record. In fact, it is
+   * possible for a condition to onset but never be discovered.
    *
-   * <p>If the ConditionOnset state's target_encounter is set to the name of a future encounter,
-   * then the condition will only be diagnosed when that future encounter occurs.
+   * <p>
+   * If the ConditionOnset state's target_encounter is set to the name of a future
+   * encounter, then the condition will only be diagnosed when that future
+   * encounter occurs.
    */
   public static class ConditionOnset extends OnsetState {
 
     @Override
     protected void updateOnsetInfo(Person person, long time) {
-      person.getOnsetConditionRecord().onConditionOnset(
-          module.name, this.name, codes.get(0).display, time
-      );
+      person.getOnsetConditionRecord().onConditionOnset(module.name, this.name, codes.get(0).display, time);
     }
 
     @Override
@@ -1091,14 +1099,17 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The ConditionEnd state type indicates a point in the module where a currently active condition
-   * should be ended, for example if the patient has been cured of a disease.
+   * The ConditionEnd state type indicates a point in the module where a currently
+   * active condition should be ended, for example if the patient has been cured
+   * of a disease.
    *
-   * <p>The ConditionEnd state supports three ways of specifying the condition to end: By `codes[]`,
-   * specifying the system, code, and display name of the condition to end By `condition_onset`,
-   * specifying the name of the ConditionOnset state in which the condition was onset By
-   * `referenced_by_attribute`, specifying the name of the attribute to which a previous
-   * ConditionOnset state assigned a condition
+   * <p>
+   * The ConditionEnd state supports three ways of specifying the condition to
+   * end: By `codes[]`, specifying the system, code, and display name of the
+   * condition to end By `condition_onset`, specifying the name of the
+   * ConditionOnset state in which the condition was onset By
+   * `referenced_by_attribute`, specifying the name of the attribute to which a
+   * previous ConditionOnset state assigned a condition
    */
   public static class ConditionEnd extends State {
     private List<Code> codes;
@@ -1114,9 +1125,7 @@ public abstract class State implements Cloneable, Serializable {
     @Override
     public boolean process(Person person, long time) {
       if (conditionOnset != null) {
-        String condition = person.getOnsetConditionRecord().getConditionFromState(
-            module.name, conditionOnset
-        );
+        String condition = person.getOnsetConditionRecord().getConditionFromState(module.name, conditionOnset);
         if (condition != null) {
           person.getOnsetConditionRecord().onConditionEnd(module.name, condition, time);
         }
@@ -1124,9 +1133,7 @@ public abstract class State implements Cloneable, Serializable {
       } else if (referencedByAttribute != null) {
         Entry condition = (Entry) person.attributes.get(referencedByAttribute);
         if (condition != null) {
-          person.getOnsetConditionRecord().onConditionEnd(
-              module.name, condition.codes.get(0).display, time
-          );
+          person.getOnsetConditionRecord().onConditionEnd(module.name, condition.codes.get(0).display, time);
           condition.stop = time;
           person.record.conditionEnd(time, condition.type);
         }
@@ -1139,12 +1146,15 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The AllergyOnset state type indicates a point in the module where the patient acquires an
-   * allergy. This is not necessarily the same as when the allergy is diagnosed and recorded in the
-   * patient's record. In fact, it is possible for an allergy to onset but never be discovered.
+   * The AllergyOnset state type indicates a point in the module where the patient
+   * acquires an allergy. This is not necessarily the same as when the allergy is
+   * diagnosed and recorded in the patient's record. In fact, it is possible for
+   * an allergy to onset but never be discovered.
    *
-   * <p>If the AllergyOnset state's target_encounter is set to the name of a future encounter,
-   * then the allergy will only be diagnosed when that future encounter occurs.
+   * <p>
+   * If the AllergyOnset state's target_encounter is set to the name of a future
+   * encounter, then the allergy will only be diagnosed when that future encounter
+   * occurs.
    */
   public static class AllergyOnset extends OnsetState {
     private String allergyType;
@@ -1187,14 +1197,16 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The AllergyEnd state type indicates a point in the module where a currently active allergy
-   * should be ended, for example if the patient's allergy subsides with time.
+   * The AllergyEnd state type indicates a point in the module where a currently
+   * active allergy should be ended, for example if the patient's allergy subsides
+   * with time.
    *
-   * <p>The AllergyEnd state supports three ways of specifying the allergy to end: By `codes[]`,
-   * specifying the system, code, and display name of the allergy to end By `allergy_onset`,
-   * specifying the name of the AllergyOnset state in which the allergy was onset By
-   * `referenced_by_attribute`, specifying the name of the attribute to which a previous
-   * AllergyOnset state assigned a condition
+   * <p>
+   * The AllergyEnd state supports three ways of specifying the allergy to end: By
+   * `codes[]`, specifying the system, code, and display name of the allergy to
+   * end By `allergy_onset`, specifying the name of the AllergyOnset state in
+   * which the allergy was onset By `referenced_by_attribute`, specifying the name
+   * of the attribute to which a previous AllergyOnset state assigned a condition
    *
    */
   public static class AllergyEnd extends State {
@@ -1225,11 +1237,12 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The MedicationOrder state type indicates a point in the module where a medication is
-   * prescribed. MedicationOrder states may only be processed during an Encounter, and so must
-   * occur after the target Encounter state and before the EncounterEnd. See the Encounter
-   * section above for more details. The MedicationOrder state supports identifying a previous
-   * ConditionOnset or the name of an attribute as the reason for the prescription. Adding a
+   * The MedicationOrder state type indicates a point in the module where a
+   * medication is prescribed. MedicationOrder states may only be processed during
+   * an Encounter, and so must occur after the target Encounter state and before
+   * the EncounterEnd. See the Encounter section above for more details. The
+   * MedicationOrder state supports identifying a previous ConditionOnset or the
+   * name of an attribute as the reason for the prescription. Adding a
    * 'administration' field allows for the MedicationOrder to also export a
    * MedicationAdministration into the exported FHIR record.
    */
@@ -1242,8 +1255,9 @@ public abstract class State implements Cloneable, Serializable {
     private boolean chronic;
 
     /**
-     * Java Serialization support method to serialize the JsonObject prescription which isn't
-     * natively serializable.
+     * Java Serialization support method to serialize the JsonObject prescription
+     * which isn't natively serializable.
+     * 
      * @param oos the stream to write to
      */
     private void writeObject(ObjectOutputStream oos) throws IOException {
@@ -1260,14 +1274,15 @@ public abstract class State implements Cloneable, Serializable {
     }
 
     /**
-     * Java Serialization support method to deserialize the JsonObject prescription which isn't
-     * natively serializable.
+     * Java Serialization support method to deserialize the JsonObject prescription
+     * which isn't natively serializable.
+     * 
      * @param ois the stream to read from
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-      codes = (List<Code>)ois.readObject();
-      reason = (String)ois.readObject();
-      assignToAttribute = (String)ois.readObject();
+      codes = (List<Code>) ois.readObject();
+      reason = (String) ois.readObject();
+      assignToAttribute = (String) ois.readObject();
       administration = ois.readBoolean();
       chronic = ois.readBoolean();
       String prescriptionJson = (String) ois.readObject();
@@ -1298,7 +1313,8 @@ public abstract class State implements Cloneable, Serializable {
       medication.name = this.name;
       medication.additionalAttributes = this.additionalAttributes;
       if (reason != null) {
-        // "reason" is an attribute or stateName referencing a previous conditionOnset state
+        // "reason" is an attribute or stateName referencing a previous conditionOnset
+        // state
         if (person.attributes.containsKey(reason)) {
           Entry condition = (Entry) person.attributes.get(reason);
           medication.reasons.addAll(condition.codes);
@@ -1333,13 +1349,15 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The MedicationEnd state type indicates a point in the module where a currently prescribed
-   * medication should be ended.
+   * The MedicationEnd state type indicates a point in the module where a
+   * currently prescribed medication should be ended.
    *
-   * <p>The MedicationEnd state supports three ways of specifying the medication to end:
-   * By `codes[]`, specifying the code system, code, and display name of the medication to end By
-   * `medication_order`, specifying the name of the MedicationOrder state in which the medication
-   * was prescribed By `referenced_by_attribute`, specifying the name of the attribute to which a
+   * <p>
+   * The MedicationEnd state supports three ways of specifying the medication to
+   * end: By `codes[]`, specifying the code system, code, and display name of the
+   * medication to end By `medication_order`, specifying the name of the
+   * MedicationOrder state in which the medication was prescribed By
+   * `referenced_by_attribute`, specifying the name of the attribute to which a
    * previous MedicationOrder state assigned a medication
    */
   public static class MedicationEnd extends State {
@@ -1348,9 +1366,9 @@ public abstract class State implements Cloneable, Serializable {
     private String referencedByAttribute;
 
     // note that this code has some child codes for various different reasons,
-    // ex "medical aim achieved", "ineffective", "avoid interaction", "side effect", etc
-    private static final Code EXPIRED = new Code("SNOMED-CT", "182840001",
-        "Drug treatment stopped - medical advice");
+    // ex "medical aim achieved", "ineffective", "avoid interaction", "side effect",
+    // etc
+    private static final Code EXPIRED = new Code("SNOMED-CT", "182840001", "Drug treatment stopped - medical advice");
 
     @Override
     public MedicationEnd clone() {
@@ -1374,11 +1392,12 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The CarePlanStart state type indicates a point in the module where a care plan should be
-   * prescribed. CarePlanStart states may only be processed during an Encounter, and so must occur
-   * after the target Encounter state and before the EncounterEnd. See the Encounter section above
-   * for more details. One or more codes describes the care plan and a list of activities describes
-   * what the care plan entails.
+   * The CarePlanStart state type indicates a point in the module where a care
+   * plan should be prescribed. CarePlanStart states may only be processed during
+   * an Encounter, and so must occur after the target Encounter state and before
+   * the EncounterEnd. See the Encounter section above for more details. One or
+   * more codes describes the care plan and a list of activities describes what
+   * the care plan entails.
    */
   public static class CarePlanStart extends State {
     private List<Code> codes;
@@ -1415,7 +1434,8 @@ public abstract class State implements Cloneable, Serializable {
         careplan.goals.addAll(goals);
       }
       if (reason != null) {
-        // "reason" is an attribute or stateName referencing a previous conditionOnset state
+        // "reason" is an attribute or stateName referencing a previous conditionOnset
+        // state
         if (person.attributes.containsKey(reason)) {
           Entry condition = (Entry) person.attributes.get(reason);
           careplan.reasons.addAll(condition.codes);
@@ -1437,12 +1457,13 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The CarePlanEnd state type indicates a point in the module where a currently prescribed care
-   * plan should be ended. The CarePlanEnd state supports three ways of specifying the care plan to
-   * end: By `codes[]`, specifying the code system, code, and display name of the care plan to end
-   * By `careplan`, specifying the name of the CarePlanStart state in which the care plan was
-   * prescribed By `referenced_by_attribute`, specifying the name of the attribute to which a
-   * previous CarePlanStart state assigned a care plan
+   * The CarePlanEnd state type indicates a point in the module where a currently
+   * prescribed care plan should be ended. The CarePlanEnd state supports three
+   * ways of specifying the care plan to end: By `codes[]`, specifying the code
+   * system, code, and display name of the care plan to end By `careplan`,
+   * specifying the name of the CarePlanStart state in which the care plan was
+   * prescribed By `referenced_by_attribute`, specifying the name of the attribute
+   * to which a previous CarePlanStart state assigned a care plan
    */
   public static class CarePlanEnd extends State {
     private List<Code> codes;
@@ -1473,11 +1494,13 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The Procedure state type indicates a point in the module where a procedure should be performed.
-   * Procedure states may only be processed during an Encounter, and so must occur after the target
-   * Encounter state and before the EncounterEnd. See the Encounter section above for more details.
-   * Optionally, you may define a duration of time that the procedure takes. The Procedure also
-   * supports identifying a previous ConditionOnset or an attribute as the reason for the procedure.
+   * The Procedure state type indicates a point in the module where a procedure
+   * should be performed. Procedure states may only be processed during an
+   * Encounter, and so must occur after the target Encounter state and before the
+   * EncounterEnd. See the Encounter section above for more details. Optionally,
+   * you may define a duration of time that the procedure takes. The Procedure
+   * also supports identifying a previous ConditionOnset or an attribute as the
+   * reason for the procedure.
    */
   public static class Procedure extends Delayable {
     private List<Code> codes;
@@ -1494,8 +1517,7 @@ public abstract class State implements Cloneable, Serializable {
     protected void initialize(Module module, String name, JsonObject definition) {
       super.initialize(module, name, definition);
       if (distribution != null && !distribution.validate()) {
-        throw new IllegalStateException(
-            String.format("State %s contains an invalid distribution", this.name));
+        throw new IllegalStateException(String.format("State %s contains an invalid distribution", this.name));
       }
     }
 
@@ -1525,7 +1547,8 @@ public abstract class State implements Cloneable, Serializable {
       procedure.additionalAttributes = this.additionalAttributes;
       entry = procedure;
       if (reason != null) {
-        // "reason" is an attribute or stateName referencing a previous conditionOnset state
+        // "reason" is an attribute or stateName referencing a previous conditionOnset
+        // state
         if (person.attributes.containsKey(reason)) {
           Entry condition = (Entry) person.attributes.get(reason);
           procedure.reasons.addAll(condition.codes);
@@ -1569,17 +1592,21 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The VitalSign state type indicates a point in the module where a patient's vital sign is set.
-   * Vital Signs represent the actual physical state of the patient, in contrast to Observations
-   * which are the recording of that physical state.
+   * The VitalSign state type indicates a point in the module where a patient's
+   * vital sign is set. Vital Signs represent the actual physical state of the
+   * patient, in contrast to Observations which are the recording of that physical
+   * state.
    *
-   * <p>Usage Notes In general, the Vital Sign should be used if the value directly affects the
-   * patient's physical condition. For example, high blood pressure directly increases the risk of
-   * heart attack so any conditional logic that would trigger a heart attack should reference a
-   * Vital Sign instead of an Observation. ' On the other hand, if the value only affects the
-   * patient's care, using just an Observation would be more appropriate. For example, it is the
-   * observation of MMSE that can lead to a diagnosis of Alzheimer's; MMSE is an observed value and
-   * not a physical metric, so it should not be stored in a VitalSign.
+   * <p>
+   * Usage Notes In general, the Vital Sign should be used if the value directly
+   * affects the patient's physical condition. For example, high blood pressure
+   * directly increases the risk of heart attack so any conditional logic that
+   * would trigger a heart attack should reference a Vital Sign instead of an
+   * Observation. ' On the other hand, if the value only affects the patient's
+   * care, using just an Observation would be more appropriate. For example, it is
+   * the observation of MMSE that can lead to a diagnosis of Alzheimer's; MMSE is
+   * an observed value and not a physical metric, so it should not be stored in a
+   * VitalSign.
    */
   public static class VitalSign extends LegacyStateWithUnitlessRV {
     private org.mitre.synthea.world.concepts.VitalSign vitalSign;
@@ -1592,8 +1619,7 @@ public abstract class State implements Cloneable, Serializable {
     protected void initialize(Module module, String name, JsonObject definition) {
       super.initialize(module, name, definition);
       if (distribution != null && !distribution.validate()) {
-        throw new IllegalStateException(
-            String.format("State %s contains an invalid distribution", this.name));
+        throw new IllegalStateException(String.format("State %s contains an invalid distribution", this.name));
       }
     }
 
@@ -1621,11 +1647,9 @@ public abstract class State implements Cloneable, Serializable {
     public boolean process(Person person, long time) {
       if (isLegacyGmf()) {
         if (exact != null) {
-          person.setVitalSign(vitalSign, new ConstantValueGenerator(person,
-              (double) exact.quantity));
+          person.setVitalSign(vitalSign, new ConstantValueGenerator(person, (double) exact.quantity));
         } else if (range != null) {
-          person.setVitalSign(vitalSign, new RandomValueGenerator(person,
-              (double) range.low, (double) range.high));
+          person.setVitalSign(vitalSign, new RandomValueGenerator(person, (double) range.low, (double) range.high));
         }
       } else {
         if (getExpProcessor().get() != null) {
@@ -1635,8 +1659,7 @@ public abstract class State implements Cloneable, Serializable {
           person.setVitalSign(vitalSign, new RandomValueGenerator(person, distribution));
         } else {
           throw new RuntimeException(
-              "VitalSign state has no exact quantity, distribution, expression"
-                  + " or low/high range: " + this);
+              "VitalSign state has no exact quantity, distribution, expression" + " or low/high range: " + this);
         }
       }
 
@@ -1645,36 +1668,46 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The Observation state type indicates a point in the module where an observation is recorded.
-   * Observations include clinical findings, vital signs, lab tests, etc. Observation states may
-   * only be processed during an Encounter, and so must occur after the target Encounter state and
-   * before the EncounterEnd. See the Encounter section above for more details.
+   * The Observation state type indicates a point in the module where an
+   * observation is recorded. Observations include clinical findings, vital signs,
+   * lab tests, etc. Observation states may only be processed during an Encounter,
+   * and so must occur after the target Encounter state and before the
+   * EncounterEnd. See the Encounter section above for more details.
    *
-   * <p>Observation Categories Common observation categories include: "vital-signs" :
-   * Clinical observations measure the body's basic functions such as such as blood pressure, heart
-   * rate, respiratory rate, height, weight, body mass index, head circumference, pulse oximetry,
-   * temperature, and body surface area.
+   * <p>
+   * Observation Categories Common observation categories include: "vital-signs" :
+   * Clinical observations measure the body's basic functions such as such as
+   * blood pressure, heart rate, respiratory rate, height, weight, body mass
+   * index, head circumference, pulse oximetry, temperature, and body surface
+   * area.
    *
-   * <p>"procedure" : Observations generated by other procedures. This category includes
-   * observations resulting from interventional and non-interventional procedures excluding lab and
-   * imaging (e.g. cardiology catheterization, endoscopy, electrodiagnostics, etc.). Procedure
-   * results are typically generated by a clinician to provide more granular information about
-   * component observations made during a procedure, such as where a gastroenterologist reports the
-   * size of a polyp observed during a colonoscopy.
+   * <p>
+   * "procedure" : Observations generated by other procedures. This category
+   * includes observations resulting from interventional and non-interventional
+   * procedures excluding lab and imaging (e.g. cardiology catheterization,
+   * endoscopy, electrodiagnostics, etc.). Procedure results are typically
+   * generated by a clinician to provide more granular information about component
+   * observations made during a procedure, such as where a gastroenterologist
+   * reports the size of a polyp observed during a colonoscopy.
    *
-   * <p>"laboratory" : The results of observations generated by laboratories. Laboratory results are
-   * typically generated by laboratories providing analytic services in areas such as chemistry,
-   * hematology, serology, histology, cytology, anatomic pathology, microbiology, and/or virology.
-   * These observations are based on analysis of specimens obtained from the patient and submitted
-   * to the laboratory.
+   * <p>
+   * "laboratory" : The results of observations generated by laboratories.
+   * Laboratory results are typically generated by laboratories providing analytic
+   * services in areas such as chemistry, hematology, serology, histology,
+   * cytology, anatomic pathology, microbiology, and/or virology. These
+   * observations are based on analysis of specimens obtained from the patient and
+   * submitted to the laboratory.
    *
-   * <p>"exam" : Observations generated by physical exam findings including direct observations made
-   * by a clinician and use of simple instruments and the result of simple maneuvers performed
-   * directly on the patient's body.
+   * <p>
+   * "exam" : Observations generated by physical exam findings including direct
+   * observations made by a clinician and use of simple instruments and the result
+   * of simple maneuvers performed directly on the patient's body.
    *
-   * <p>"social-history" : The Social History Observations define the patient's occupational,
-   * personal (e.g. lifestyle), social, and environmental history and health risk factors, as well
-   * as administrative data such as marital status, race, ethnicity and religious affiliation.
+   * <p>
+   * "social-history" : The Social History Observations define the patient's
+   * occupational, personal (e.g. lifestyle), social, and environmental history
+   * and health risk factors, as well as administrative data such as marital
+   * status, race, ethnicity and religious affiliation.
    */
   public static class Observation extends LegacyStateWithUnitlessRV {
     private List<Code> codes;
@@ -1699,16 +1732,13 @@ public abstract class State implements Cloneable, Serializable {
       if (exact != null || range != null) {
         // units are required
         if (StringUtils.isBlank(unit)) {
-          throw new RuntimeException(
-              "Observations with numeric quantities must contain non-blank units. "
-          + "Module \"" + module.name + "\": State \"" + name
-          + "\": Unit is missing, empty, or all whitespace");
+          throw new RuntimeException("Observations with numeric quantities must contain non-blank units. " + "Module \""
+              + module.name + "\": State \"" + name + "\": Unit is missing, empty, or all whitespace");
         }
       }
 
       if (distribution != null && !distribution.validate()) {
-        throw new IllegalStateException(
-            String.format("State %s contains an invalid distribution", this.name));
+        throw new IllegalStateException(String.format("State %s contains an invalid distribution", this.name));
       }
     }
 
@@ -1740,6 +1770,7 @@ public abstract class State implements Cloneable, Serializable {
     @Override
     public boolean process(Person person, long time) {
       Object value = null;
+      String primaryCode = codes.get(0).code;
       if (isLegacyGmf()) {
         if (exact != null) {
           value = exact.quantity;
@@ -1756,8 +1787,7 @@ public abstract class State implements Cloneable, Serializable {
           value = person.getVitalSign(vitalSign, time);
         } else if (valueCode != null) {
           value = valueCode;
-        } else if (threadExpProcessor != null
-            && threadExpProcessor.get() != null) {
+        } else if (threadExpProcessor != null && threadExpProcessor.get() != null) {
           value = threadExpProcessor.get().evaluate(person, time);
         } else if (sampledData != null) {
           // Capture the data lists from person attributes
@@ -1781,9 +1811,9 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * ObservationGroup is an internal parent class to provide common logic to state types that
-   * package multiple observations into a single entity. It is an implementation detail and should
-   * not be referenced by JSON modules directly.
+   * ObservationGroup is an internal parent class to provide common logic to state
+   * types that package multiple observations into a single entity. It is an
+   * implementation detail and should not be referenced by JSON modules directly.
    */
   private abstract static class ObservationGroup extends State {
     protected List<Code> codes;
@@ -1800,9 +1830,11 @@ public abstract class State implements Cloneable, Serializable {
     public ObservationGroup clone() {
       ObservationGroup clone = (ObservationGroup) super.clone();
 
-      // IMPORTANT: because each observation gets process()ed when the state gets processed,
+      // IMPORTANT: because each observation gets process()ed when the state gets
+      // processed,
       // we need to ensure we deep clone the list
-      // (otherwise as this gets passed around, the same objects are used for different patients
+      // (otherwise as this gets passed around, the same objects are used for
+      // different patients
       // which causes weird and unexpected results)
       List<Observation> cloneObs = new ArrayList<>(observations.size());
       for (Observation o : observations) {
@@ -1815,12 +1847,13 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The MultiObservation state indicates that some number of Observations should be
-   * grouped together as a single observation. This can be necessary when one observation records
-   * multiple values, for example in the case of Blood Pressure, which is really 2 values, Systolic
-   * and Diastolic Blood Pressure.  MultiObservation states may only be processed
-   * during an Encounter, and so must occur after the target Encounter state and before the
-   * EncounterEnd. See the Encounter section above for more details.
+   * The MultiObservation state indicates that some number of Observations should
+   * be grouped together as a single observation. This can be necessary when one
+   * observation records multiple values, for example in the case of Blood
+   * Pressure, which is really 2 values, Systolic and Diastolic Blood Pressure.
+   * MultiObservation states may only be processed during an Encounter, and so
+   * must occur after the target Encounter state and before the EncounterEnd. See
+   * the Encounter section above for more details.
    */
   public static class MultiObservation extends ObservationGroup {
     private String category;
@@ -1855,11 +1888,12 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The DiagnosticReport state indicates that some number of Observations should be
-   * grouped together within a single Diagnostic Report. This can be used when multiple observations
-   * are part of a single panel. DiagnosticReport states may only be processed during an Encounter,
-   * and so must occur after the target Encounter state and before the EncounterEnd. See the
-   * Encounter section above for more details.
+   * The DiagnosticReport state indicates that some number of Observations should
+   * be grouped together within a single Diagnostic Report. This can be used when
+   * multiple observations are part of a single panel. DiagnosticReport states may
+   * only be processed during an Encounter, and so must occur after the target
+   * Encounter state and before the EncounterEnd. See the Encounter section above
+   * for more details.
    */
   public static class DiagnosticReport extends ObservationGroup {
     @Override
@@ -1895,20 +1929,25 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The ImagingStudy state indicates a point in the module when an imaging study was performed.
-   * An ImagingStudy consists of one or more Studies, where each Study contains one or more
-   * Instances of an image. ImagingStudy states may only be processed during an Encounter,
-   * and must occur after the target Encounter state and before the EncounterEnd. See the
-   * Encounter section above for more details.
+   * The ImagingStudy state indicates a point in the module when an imaging study
+   * was performed. An ImagingStudy consists of one or more Studies, where each
+   * Study contains one or more Instances of an image. ImagingStudy states may
+   * only be processed during an Encounter, and must occur after the target
+   * Encounter state and before the EncounterEnd. See the Encounter section above
+   * for more details.
    */
   public static class ImagingStudy extends State {
-    /** The equivalent SNOMED codes that describe this ImagingStudy as a Procedure. */
+    /**
+     * The equivalent SNOMED codes that describe this ImagingStudy as a Procedure.
+     */
     private Code procedureCode;
     /** The Series of Instances that represent this ImagingStudy. */
     private List<HealthRecord.ImagingStudy.Series> series;
-    /** Minimum and maximum number of series in this study.
-     * Actual number is picked uniformly randomly from this range, copying series data from
-     * the first series provided. */
+    /**
+     * Minimum and maximum number of series in this study. Actual number is picked
+     * uniformly randomly from this range, copying series data from the first series
+     * provided.
+     */
     public int minNumberSeries = 0;
     public int maxNumberSeries = 0;
 
@@ -1933,7 +1972,8 @@ public abstract class State implements Cloneable, Serializable {
       String primaryProcedureCode = procedureCode.code;
       entry.codes.add(procedureCode);
 
-      // Also add the Procedure equivalent of this ImagingStudy to the patient's record
+      // Also add the Procedure equivalent of this ImagingStudy to the patient's
+      // record
       HealthRecord.Procedure procedure = person.record.procedure(time, primaryProcedureCode);
       procedure.name = this.name;
       procedure.codes.add(procedureCode);
@@ -1943,8 +1983,7 @@ public abstract class State implements Cloneable, Serializable {
     }
 
     private void duplicateSeries(RandomNumberGenerator random, long time) {
-      if (minNumberSeries > 0 && maxNumberSeries >= minNumberSeries
-          && series.size() > 0) {
+      if (minNumberSeries > 0 && maxNumberSeries >= minNumberSeries && series.size() > 0) {
 
         // Randomly pick the number of series in this study
         int numberOfSeries = (int) random.rand(minNumberSeries, maxNumberSeries + 1);
@@ -1958,7 +1997,8 @@ public abstract class State implements Cloneable, Serializable {
           series.add(newSeries);
         }
       } else {
-        // Ensure series references are distinct (required if no. of instances is picked randomly)
+        // Ensure series references are distinct (required if no. of instances is picked
+        // randomly)
         List<HealthRecord.ImagingStudy.Series> oldSeries = series;
         series = new ArrayList<HealthRecord.ImagingStudy.Series>();
         for (int i = 0; i < oldSeries.size(); i++) {
@@ -1971,12 +2011,10 @@ public abstract class State implements Cloneable, Serializable {
     private void duplicateInstances(RandomNumberGenerator random, long time) {
       for (int i = 0; i < series.size(); i++) {
         HealthRecord.ImagingStudy.Series s = series.get(i);
-        if (s.minNumberInstances > 0 && s.maxNumberInstances >= s.minNumberInstances
-            && s.instances.size() > 0) {
+        if (s.minNumberInstances > 0 && s.maxNumberInstances >= s.minNumberInstances && s.instances.size() > 0) {
 
           // Randomly pick the number of instances in this series
-          int numberOfInstances =
-              (int) random.rand(s.minNumberInstances, s.maxNumberInstances + 1);
+          int numberOfInstances = (int) random.rand(s.minNumberInstances, s.maxNumberInstances + 1);
           HealthRecord.ImagingStudy.Instance referenceInstance = s.instances.get(0);
           s.instances = new ArrayList<HealthRecord.ImagingStudy.Instance>();
 
@@ -1992,10 +2030,10 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The Symptom state type adds or updates a patient's symptom. Synthea tracks symptoms in order to
-   * drive a patient's encounters, on a scale of 1-100. A symptom may be tracked for multiple
-   * conditions, in these cases only the highest value is considered. See also the Symptom logical
-   * condition type.
+   * The Symptom state type adds or updates a patient's symptom. Synthea tracks
+   * symptoms in order to drive a patient's encounters, on a scale of 1-100. A
+   * symptom may be tracked for multiple conditions, in these cases only the
+   * highest value is considered. See also the Symptom logical condition type.
    */
   public static class Symptom extends LegacyStateWithUnitlessRV {
     private String symptom;
@@ -2015,8 +2053,7 @@ public abstract class State implements Cloneable, Serializable {
       }
       addressed = false;
       if (distribution != null && !distribution.validate()) {
-        throw new IllegalStateException(
-            String.format("State %s contains an invalid distribution", this.name));
+        throw new IllegalStateException(String.format("State %s contains an invalid distribution", this.name));
       }
     }
 
@@ -2028,7 +2065,7 @@ public abstract class State implements Cloneable, Serializable {
 
     @Override
     public boolean process(Person person, long time) {
-      //using the module name instead of the cause
+      // using the module name instead of the cause
       if (person.rand() <= probability) {
         if (isLegacyGmf()) {
           if (exact != null) {
@@ -2040,15 +2077,12 @@ public abstract class State implements Cloneable, Serializable {
             }
             person.setSymptom(this.module.name, cause, symptom, time, quantity, addressed);
           } else if (range != null) {
-            person.setSymptom(
-                this.module.name, cause, symptom, time,
-                (int) person.rand((double) range.low, (double) range.high), addressed
-            );
+            person.setSymptom(this.module.name, cause, symptom, time,
+                (int) person.rand((double) range.low, (double) range.high), addressed);
           }
         } else {
           if (distribution != null) {
-            person.setSymptom(this.module.name, cause, symptom, time,
-                (int) distribution.generate(person), addressed);
+            person.setSymptom(this.module.name, cause, symptom, time, (int) distribution.generate(person), addressed);
           } else {
             person.setSymptom(this.module.name, cause, symptom, time, 0, addressed);
           }
@@ -2059,11 +2093,11 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The Device state indicates the point that a permanent or semi-permanent device
-   * (for example, a prosthetic, or pacemaker) is associated to a person.
-   * The actual procedure in which the device is implanted is not automatically generated
-   * and should be added separately. A Device may have a manufacturer or model listed
-   * for cases where there is generally only one choice.
+   * The Device state indicates the point that a permanent or semi-permanent
+   * device (for example, a prosthetic, or pacemaker) is associated to a person.
+   * The actual procedure in which the device is implanted is not automatically
+   * generated and should be added separately. A Device may have a manufacturer or
+   * model listed for cases where there is generally only one choice.
    */
   public static class Device extends State {
     public Code code;
@@ -2094,12 +2128,12 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The DeviceEnd state indicates the point that a permanent or semi-permanent device
-   * (for example, a prosthetic, or pacemaker) is removed from a person.
-   * The actual procedure in which the device is removed is not automatically generated
-   * and should be added separately.
-   * The device being ended may be referenced by the name of the Device state,
-   * by an attribute containing a Device, or by the code.
+   * The DeviceEnd state indicates the point that a permanent or semi-permanent
+   * device (for example, a prosthetic, or pacemaker) is removed from a person.
+   * The actual procedure in which the device is removed is not automatically
+   * generated and should be added separately. The device being ended may be
+   * referenced by the name of the Device state, by an attribute containing a
+   * Device, or by the code.
    */
   public static class DeviceEnd extends State {
     private List<Code> codes;
@@ -2117,8 +2151,7 @@ public abstract class State implements Cloneable, Serializable {
       if (device != null) {
         person.record.deviceRemoveByState(time, device);
       } else if (referencedByAttribute != null) {
-        HealthRecord.Device deviceEntry = (HealthRecord.Device) person.attributes
-                .get(referencedByAttribute);
+        HealthRecord.Device deviceEntry = (HealthRecord.Device) person.attributes.get(referencedByAttribute);
         if (deviceEntry != null) {
           deviceEntry.stop = time;
           person.record.deviceRemove(time, deviceEntry.type);
@@ -2131,8 +2164,9 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The SupplyList state includes a list of supplies that are needed for the current encounter.
-   * Supplies may include things like PPE for the physician, or other resources and machines.
+   * The SupplyList state includes a list of supplies that are needed for the
+   * current encounter. Supplies may include things like PPE for the physician, or
+   * other resources and machines.
    *
    */
   public static class SupplyList extends State {
@@ -2159,24 +2193,30 @@ public abstract class State implements Cloneable, Serializable {
   }
 
   /**
-   * The Death state type indicates a point in the module at which the patient dies or the patient
-   * is given a terminal diagnosis (e.g. "you have 3 months to live"). When the Death state is
-   * processed, the patient's death is immediately recorded (the alive? method will return false)
-   * unless range or exact attributes are specified, in which case the patient will die sometime in
-   * the future. In either case the module will continue to progress to the next state(s) for the
-   * current time-step. Typically, the Death state should transition to a Terminal state.
+   * The Death state type indicates a point in the module at which the patient
+   * dies or the patient is given a terminal diagnosis (e.g. "you have 3 months to
+   * live"). When the Death state is processed, the patient's death is immediately
+   * recorded (the alive? method will return false) unless range or exact
+   * attributes are specified, in which case the patient will die sometime in the
+   * future. In either case the module will continue to progress to the next
+   * state(s) for the current time-step. Typically, the Death state should
+   * transition to a Terminal state.
    *
-   * <p>The Cause of Death listed on a Death Certificate can be specified in three ways:
-   * By `codes[]`, specifying the system, code, and display name of the condition causing death.
-   * By `condition_onset`, specifying the name of the ConditionOnset state in which the condition
-   * causing death was onset. By `referenced_by_attribute`, specifying the name of the attribute to
-   * which a previous ConditionOnset state assigned a condition that caused death.
+   * <p>
+   * The Cause of Death listed on a Death Certificate can be specified in three
+   * ways: By `codes[]`, specifying the system, code, and display name of the
+   * condition causing death. By `condition_onset`, specifying the name of the
+   * ConditionOnset state in which the condition causing death was onset. By
+   * `referenced_by_attribute`, specifying the name of the attribute to which a
+   * previous ConditionOnset state assigned a condition that caused death.
    *
-   * <p>Implementation Warning If a Death state is processed after a Delay, it may cause
-   * inconsistencies in the record. This is because the Delay implementation must rewind time to
-   * correctly honor the requested delay duration. If it rewinds time, and then the patient dies at
-   * the rewinded time, then any modules that were processed before the generic module may have
-   * created events and records with a timestamp after the patient's death.
+   * <p>
+   * Implementation Warning If a Death state is processed after a Delay, it may
+   * cause inconsistencies in the record. This is because the Delay implementation
+   * must rewind time to correctly honor the requested delay duration. If it
+   * rewinds time, and then the patient dies at the rewinded time, then any
+   * modules that were processed before the generic module may have created events
+   * and records with a timestamp after the patient's death.
    */
   public static class Death extends State {
     private List<Code> codes;
@@ -2212,8 +2252,8 @@ public abstract class State implements Cloneable, Serializable {
         Entry entry = (Entry) person.attributes.get(referencedByAttribute);
         if (entry == null) {
           // condition referenced but not yet diagnosed
-          throw new RuntimeException("Attribute '" + referencedByAttribute
-              + "' was referenced by state '" + name + "' but not set");
+          throw new RuntimeException(
+              "Attribute '" + referencedByAttribute + "' was referenced by state '" + name + "' but not set");
         }
         reason = entry.codes.get(0);
       }
